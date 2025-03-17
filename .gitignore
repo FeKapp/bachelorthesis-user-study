@@ -1,0 +1,14 @@
+# Ignore Python bytecode and cache
+__pycache__/
+*.pyc
+*.pyo
+*.cpython-*
+
+# Ignore virtual environments
+myenv/
+
+# Ignore temporary session files
+session_*
+
+# Ignore data files (if they contain sensitive info)
+*.csv
