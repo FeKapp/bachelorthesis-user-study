@@ -157,24 +157,18 @@ def show_progress():
         st.caption(f"Study progress: {int(progress*100)}% complete")
 
 def show_intro():
-    st.title("Fund Allocation Study")
-    st.write("""
-    **Welcome to the investment study!**
-    
-    You will complete multiple rounds of:
-    1. Initial allocation
-    2. AI recommendation review
-    3. Performance analysis
-    
-    Funds available:
-    - Fund A (High Risk/Return): 11% mean, 15% stdev
-    - Fund B (Low Risk/Return): 3% mean, 5% stdev
-    """)
+    st.title("Experiment Introduction")
+    # Read the introduction text from the file
+    intro_file_path = os.path.join("assets", "text", "introduction.txt")
+    with open(intro_file_path, "r", encoding="utf-8") as f:
+        intro_text = f.read()
+    st.write(intro_text)
     
     if st.button("Begin Study"):
         st.session_state.page = 'trial'
         update_session_progress()
         st.rerun()
+
 
 def handle_trial_steps():
     if st.session_state.trial >= st.session_state.max_trials:
@@ -194,9 +188,11 @@ def show_initial_allocation():
     
     col1, col2 = st.columns(2)
     with col1:
+        st.image(os.path.join("assets", "images", "fund_A.png"), width = 200) 
         initial_a = st.number_input("Allocation to Fund A (%)", 0, 100, 50, key=f"initial_a_{st.session_state.trial}")
     
     with col2:
+        st.image(os.path.join("assets", "images", "fund_B.png"), width = 200)  
         initial_b = 100 - initial_a
         st.write(f"Automatic allocation: {initial_b}%")
 
@@ -232,7 +228,7 @@ def show_ai_recommendation():
         st.write(f"Fund B: {initial_b}%")
     
     with col2:
-        st.subheader("AI Recommendation")
+        st.subheader("✨ AI Recommendation")
         st.write(f"Fund A: {ai_a}%")
         st.write(f"Fund B: {ai_b}%")
     
@@ -316,8 +312,16 @@ def show_performance():
 
 def show_final():
     st.title("Final Allocation")
-    final_a = st.number_input("Final allocation to Fund A (%)", 0, 100, 50)
-    final_b = 100 - final_a
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image(os.path.join("assets", "images", "fund_A.png"), width= 200)  
+        final_a = st.number_input("Final allocation to Fund A (%)", 0, 100, 50)
+    
+    with col2:
+        st.image(os.path.join("assets", "images", "fund_B.png"), width= 200) 
+        final_b = 100 - final_a
+        st.write(f"Automatic allocation: {final_b}%")
     
     if st.button("Submit Final Allocation"):
         return_a = np.random.normal(0.11, 0.15)
