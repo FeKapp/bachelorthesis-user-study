@@ -6,6 +6,8 @@ import uuid
 import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
+import plotly.graph_objects as go
+
 
 # Load environment variables
 load_dotenv()
@@ -263,14 +265,48 @@ def show_performance():
     
     final_a, final_b = trial_data['final']
     final_return = (final_a/100)*return_a + (final_b/100)*return_b
-    
-    chart_data = pd.DataFrame({
-        'Returns': [return_a, return_b, final_return],
-        'Category': ['Fund A', 'Fund B', 'Your Portfolio']
-    }).set_index('Category')
-    
-    st.bar_chart(chart_data)
 
+    # Calculate AI Portfolio return
+    ai_a, ai_b = trial_data['ai']
+    ai_return = (ai_a/100)*return_a + (ai_b/100)*return_b
+
+    # Convert to percentages
+    fund_a_perf = return_a * 100
+    fund_b_perf = return_b * 100
+    ai_perf = ai_return * 100
+    user_perf = final_return * 100
+
+    # Create DataFrame for plotting
+    df = pd.DataFrame({
+        'Category': ['Fund A', 'Fund B', 'AI Portfolio', 'User Portfolio'],
+        'Performance': [fund_a_perf, fund_b_perf, ai_perf, user_perf]
+    })
+
+    # Determine colors based on performance
+    colors = ['green' if perf >= 0 else 'red' for perf in df['Performance']]
+
+    # Create Plotly bar chart
+    fig = go.Figure(data=[
+        go.Bar(
+            x=df['Category'],
+            y=df['Performance'],
+            marker_color=colors,
+            text=[f"{val:.2f}%" for val in df['Performance']],
+            textposition='outside'
+        )
+    ])
+
+    # Update layout for better presentation
+    fig.update_layout(
+        yaxis_title='Performance (%)',
+        showlegend=False,
+        margin=dict(t=20, b=20)  # Adjust margins to fit text
+    )
+
+    # Display the Plotly chart
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Button to proceed to next trial or final allocation
     btn_label = "Continue to Next Trial" if st.session_state.trial < st.session_state.max_trials - 1 else "Proceed to Final Allocation"
     if st.button(btn_label):
         st.session_state.trial += 1
