@@ -165,7 +165,7 @@ def show_demographics():
     other_countries = [c for c in all_countries if c not in priority_countries]
     country_list = priority_countries + sorted(other_countries)
     
-    with st.form("demographic_form"):
+    with st.form(key = "demographic_form", enter_to_submit=False):
         st.write("Please answer the following questions before we begin:")
         
         # Country selection
