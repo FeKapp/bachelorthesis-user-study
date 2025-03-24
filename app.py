@@ -222,7 +222,7 @@ def show_demographics():
             # Update instructed response status
             instructed_response = (place_of_birth.strip() == "")
             supabase.table('sessions').update({
-                'instructed_response1_passed': instructed_response
+                'instructed_response_1_passed': instructed_response
             }).eq('session_id', session_id).execute()
             
             st.session_state.page = 'trial'
