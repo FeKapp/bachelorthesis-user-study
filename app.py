@@ -147,7 +147,7 @@ def show_intro():
         st.rerun()
 
 def handle_trial_steps():
-    if st.session_state.trial > st.session_state.max_trials:
+    if st.session_state.trial >= st.session_state.max_trials:
         # means we've finished the last trial
         st.session_state.page = 'final'
         update_session_progress()
