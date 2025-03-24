@@ -18,7 +18,7 @@ You will then be asked to make the decision for the next financial period. At th
 
 Your responses in this experiment are very important to us. Please consider your decisions carefully and **do not write anything down during this experiment**.
 
-**To make sure you have read all the instructions, leave the place of birth field blank in the demographic questionnaire on the next page.**
+**To make sure you have read all the instructions, leave the "Place of Birth" field blank in the demographic questionnaire on the next page.**
 
 
 If you have any questions, please feel free to ask the experimenter at any time.

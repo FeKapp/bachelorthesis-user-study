@@ -159,7 +159,7 @@ def show_intro():
 def show_demographics():
     st.title("Demographic Questionnaire")
     
-    # Get country list with Switzerland and Singapore first
+    # Get country list
     all_countries = sorted([c.name for c in pycountry.countries])
     priority_countries = ["Switzerland", "Singapore"]
     other_countries = [c for c in all_countries if c not in priority_countries]
@@ -168,10 +168,18 @@ def show_demographics():
     with st.form("demographic_form"):
         st.write("Please answer the following questions before we begin:")
         
+        # Country selection
         country = st.selectbox("Country of Residence", options=country_list)
+        
+        # Instructed response check
+        place_of_birth = st.text_input("Place of Birth", 
+                                      value="", 
+                                      key="birth_place")
+
+        # Demographic fields
         gender = st.selectbox("Gender", options=[
-            "Male", "Female", "Prefer not to say"
-        ])
+            "Male", "Female", "Non-binary", "Prefer not to say"
+        ], index=3)
         
         age = st.number_input("Age", min_value=18, max_value=100, value=25)
         
@@ -201,6 +209,7 @@ def show_demographics():
         )
 
         if st.form_submit_button("Submit Demographics"):
+            # Save demographic data
             save_demographics({
                 'country': country,
                 'gender': gender,
@@ -209,6 +218,13 @@ def show_demographics():
                 'ai_proficiency': ai_proficiency,
                 'financial_literacy': financial_literacy
             })
+            
+            # Update instructed response status
+            instructed_response = (place_of_birth.strip() == "")
+            supabase.table('sessions').update({
+                'instructed_response_1_passed': instructed_response
+            }).eq('session_id', session_id).execute()
+            
             st.session_state.page = 'trial'
             update_session_progress()
             st.rerun()
@@ -245,21 +261,42 @@ def show_initial_allocation():
         st.rerun()
 
 def show_ai_recommendation():
-    # Display the trial number as (trial + 1) for the user
     st.title(f"Trial {st.session_state.trial + 1} - Step 2: AI Recommendation")
     
-    # When accessing the AI recommendations from the DB,
-    # use trial + 1 because DB trial numbers start at 1.
-    current_trial = st.session_state.trial + 1  
+    # Get scenario details
+    scenario_res = supabase.table('scenario_config').select('*').eq('scenario_id', st.session_state.scenario_id).execute()
+    scenario = scenario_res.data[0]
+    
+    # Check if this is an instructed response trial
+    is_instructed_trial = (
+        (scenario['num_trials'] == 5 and st.session_state.trial == 3) or  # Trial 4 (0-indexed)
+        (scenario['num_trials'] == 100 and st.session_state.trial == 79)  # Trial 80 (0-indexed)
+    )
+    
+    current_trial = st.session_state.trial + 1
     if st.session_state.allocations.get(st.session_state.trial, {}).get('ai') is None:
-        ai_a, ai_b = st.session_state.ai_recommendations_data[current_trial]
+        if is_instructed_trial:
+            # Hardcoded instructed response values
+            ai_a, ai_b = 55, 45
+            with st.container(border=True):
+                st.markdown("""
+                    ⚠️ **Special Instruction** ⚠️  
+                    For this trial only:  
+                    - You **MUST** allocate **exactly 55% to Fund A**  
+                    - You **MUST** allocate **exactly 45% to Fund B**  
+                    This is a test of following instructions! It will not affect your performance in this
+                    The real AI recommendation will be shown after you submit this trial.
+                """)
+        else:
+            ai_a, ai_b = st.session_state.ai_recommendations_data[current_trial]
+        
         save_allocation(st.session_state.trial, 'ai', ai_a, ai_b)
         st.session_state.allocations[st.session_state.trial] = {
             'initial': st.session_state.allocations.get(st.session_state.trial, {}).get('initial'),
             'ai': (ai_a, ai_b),
             'final': None
         }
-    
+
     initial_a, initial_b = st.session_state.allocations[st.session_state.trial]['initial']
     ai_a, ai_b = st.session_state.allocations[st.session_state.trial]['ai']
     
@@ -278,8 +315,15 @@ def show_ai_recommendation():
     
     if st.button("Submit Final Allocation"):
         save_allocation(st.session_state.trial, 'final', adjusted_a, adjusted_b)
-        # Also look up fund returns using trial+1
-        return_a, return_b = st.session_state.fund_returns_data[st.session_state.trial + 1]
+        
+        # Check and save instructed response
+        if is_instructed_trial:
+            instructed_response_passed = (adjusted_a == 55 and adjusted_b == 45)
+            supabase.table('sessions').update({
+                'instructed_response_2_passed': instructed_response_passed
+            }).eq('session_id', session_id).execute()
+        
+        return_a, return_b = st.session_state.fund_returns_data[current_trial]
         
         trial_response = supabase.table('trials') \
             .select('trial_id') \
@@ -295,7 +339,6 @@ def show_ai_recommendation():
         st.session_state.trial_step = 3
         update_session_progress()
         st.rerun()
-
 
 def show_performance():
     st.title(f"Trial {st.session_state.trial + 1} - Step 3: Performance")
