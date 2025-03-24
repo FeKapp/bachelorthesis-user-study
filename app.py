@@ -159,7 +159,7 @@ def show_intro():
 def show_demographics():
     st.title("Demographic Questionnaire")
     
-    # Get country list with Switzerland and Singapore first
+    # Get country list
     all_countries = sorted([c.name for c in pycountry.countries])
     priority_countries = ["Switzerland", "Singapore"]
     other_countries = [c for c in all_countries if c not in priority_countries]
@@ -168,10 +168,18 @@ def show_demographics():
     with st.form("demographic_form"):
         st.write("Please answer the following questions before we begin:")
         
+        # Country selection
         country = st.selectbox("Country of Residence", options=country_list)
+        
+        # Instructed response check
+        place_of_birth = st.text_input("Place of Birth", 
+                                      value="", 
+                                      key="birth_place")
+
+        # Demographic fields
         gender = st.selectbox("Gender", options=[
-            "Male", "Female", "Prefer not to say"
-        ])
+            "Male", "Female", "Non-binary", "Prefer not to say"
+        ], index=3)
         
         age = st.number_input("Age", min_value=18, max_value=100, value=25)
         
@@ -201,6 +209,7 @@ def show_demographics():
         )
 
         if st.form_submit_button("Submit Demographics"):
+            # Save demographic data
             save_demographics({
                 'country': country,
                 'gender': gender,
@@ -209,6 +218,13 @@ def show_demographics():
                 'ai_proficiency': ai_proficiency,
                 'financial_literacy': financial_literacy
             })
+            
+            # Update instructed response status
+            instructed_response = (place_of_birth.strip() == "")
+            supabase.table('sessions').update({
+                'instructed_response_1_passed': instructed_response
+            }).eq('session_id', session_id).execute()
+            
             st.session_state.page = 'trial'
             update_session_progress()
             st.rerun()
