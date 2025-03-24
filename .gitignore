@@ -16,3 +16,4 @@ session_*
 # Ignore Supabase Configuration.
 .env
 
+.DS_Store
