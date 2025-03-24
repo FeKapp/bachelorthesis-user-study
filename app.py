@@ -178,8 +178,8 @@ def show_demographics():
 
         # Demographic fields
         gender = st.selectbox("Gender", options=[
-            "Male", "Female", "Non-binary", "Prefer not to say"
-        ], index=3)
+            "Male", "Female", "Prefer not to say"
+        ], index=0)
         
         age = st.number_input("Age", min_value=18, max_value=100, value=25)
         
@@ -412,14 +412,34 @@ def show_debrief():
     st.title("Study Complete")
     st.write("**Thank you for participating!**")
     
-    if st.checkbox("I consent to my data being used for research purposes"):
-        if st.button("Confirm Consent"):
-            supabase.table('sessions').update({
-                'completed_at': datetime.now().isoformat(),
-                'consent_given': True
-            }).eq('session_id', session_id).execute()
-            st.success("Consent confirmed. Thank you!")
-            st.balloons()
+    with st.container(border=True):
+        with st.form("data_quality"):
+            st.subheader("🧪 Data Quality Assessment")
+            st.write("Please help us improve future studies by answering one final question:")
+            
+            data_quality = st.radio(
+                "How would you rate the **accuracy and care** you put into your responses during this study?",
+                options=[1, 2, 3, 4, 5, 6, 7],
+                horizontal=True,
+                format_func=lambda x: f"{x} - {['Lowest Effort','','','Neutral','','','Highest Effort'][x-1]}"
+            )
+            
+            st.markdown("---")
+            consent_given = st.checkbox("I consent to my data being used for research purposes")
+            
+            if st.form_submit_button("🔒 Finalize Submission"):
+                # Update session with all final data
+                supabase.table('sessions').update({
+                    'completed_at': datetime.now().isoformat(),
+                    'consent_given': consent_given,
+                    'data_quality_rating': data_quality
+                }).eq('session_id', session_id).execute()
+                
+                if consent_given:
+                    st.success("Thank you for your participation! Your data has been saved.")
+                    st.balloons()
+                else:
+                    st.info("Your responses have been recorded but will not be used for research purposes.")
 
 def main():
     if st.session_state.page == 'intro':
