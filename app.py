@@ -8,7 +8,6 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 import plotly.graph_objects as go
 
-
 # Load environment variables
 load_dotenv()
 
@@ -33,11 +32,9 @@ def update_session_progress():
 
 def save_allocation(trial_num, allocation_type, fund_a, fund_b, portfolio_return=None):
     """Save allocation to Supabase"""
-    # Get or create trial ID
     trial_response = supabase.table('trials').select('trial_id').eq('session_id', session_id).eq('trial_number', trial_num).execute()
     trial_id = trial_response.data[0]['trial_id'] if trial_response.data else str(uuid.uuid4())
     
-    # Create trial record if it doesn't exist
     if not trial_response.data:
         supabase.table('trials').insert({
             'trial_id': trial_id,
@@ -46,7 +43,6 @@ def save_allocation(trial_num, allocation_type, fund_a, fund_b, portfolio_return
             'created_at': datetime.now().isoformat()
         }).execute()
     
-    # Create allocation record
     supabase.table('allocations').insert({
         'allocation_id': str(uuid.uuid4()),
         'trial_id': trial_id,
@@ -58,35 +54,19 @@ def save_allocation(trial_num, allocation_type, fund_a, fund_b, portfolio_return
     }).execute()
 
 def load_session_data():
-    """Load existing session data from Supabase"""
-    # Load session
     session_response = supabase.table('sessions').select('*').eq('session_id', session_id).execute()
     if session_response.data:
         session_data = session_response.data[0]
-        
-        # Load trials and allocations
         trials_response = supabase.table('trials').select('*').eq('session_id', session_id).execute()
         fund_returns = {}
         allocations = {}
         
         for trial in trials_response.data:
-            fund_returns[trial['trial_number']] = (
-                trial['return_a'],
-                trial['return_b']
-            )
-            
+            fund_returns[trial['trial_number']] = (trial['return_a'], trial['return_b'])
             alloc_response = supabase.table('allocations').select('*').eq('trial_id', trial['trial_id']).execute()
-            allocations[trial['trial_number']] = {
-                'initial': None,
-                'ai': None,
-                'final': None
-            }
-            
+            allocations[trial['trial_number']] = {'initial': None, 'ai': None, 'final': None}
             for alloc in alloc_response.data:
-                allocations[trial['trial_number']][alloc['allocation_type']] = (
-                    alloc['fund_a'],
-                    alloc['fund_b']
-                )
+                allocations[trial['trial_number']][alloc['allocation_type']] = (alloc['fund_a'], alloc['fund_b'])
         
         return session_data, fund_returns, allocations
     return None, {}, {}
@@ -98,55 +78,53 @@ if session_response.data:
     fund_returns = {}
     allocations = {}
     
-    # Load trials and allocations
     trials_response = supabase.table('trials').select('*').eq('session_id', session_id).execute()
     for trial in trials_response.data:
         fund_returns[trial['trial_number']] = (trial['return_a'], trial['return_b'])
-        
         alloc_response = supabase.table('allocations').select('*').eq('trial_id', trial['trial_id']).execute()
-        allocations[trial['trial_number']] = {
-            'initial': None,
-            'ai': None,
-            'final': None
-        }
+        allocations[trial['trial_number']] = {'initial': None, 'ai': None, 'final': None}
         for alloc in alloc_response.data:
             allocations[trial['trial_number']][alloc['allocation_type']] = (alloc['fund_a'], alloc['fund_b'])
     
-    # Set session state
     st.session_state.update({
         'page': session_data['current_page'],
         'trial': session_data['current_trial'],
         'trial_step': session_data['current_trial_step'],
-        'scenario': session_data['scenario'],
-        'ai_type': session_data['ai_type'],
+        'scenario_id': session_data['scenario_id'],
         'max_trials': session_data['max_trials'],
         'fund_returns': fund_returns,
         'allocations': allocations
     })
 else:
-    # Create new session
-    scenario = np.random.choice(['short_unbiased', 'short_biased', 'long_unbiased', 'long_biased'])
+    # Create new session with scenario data from database
+    scenario_res = supabase.table('scenario_config').select('*').execute()
+    scenarios = scenario_res.data
+    selected_scenario = np.random.choice(scenarios)
+    
+    fr_res = supabase.table('fund_returns').select('*').eq('scenario_id', selected_scenario['scenario_id']).execute()
+    ai_res = supabase.table('ai_recommendations').select('*').eq('scenario_id', selected_scenario['scenario_id']).execute()
+    
     session_data = {
         'session_id': session_id,
-        'scenario': scenario,
-        'ai_type': 'biased' if 'biased' in scenario else 'unbiased',
-        'max_trials': 100 if 'long' in scenario else 5,
+        'scenario_id': selected_scenario['scenario_id'],
         'current_page': 'intro',
         'current_trial': 0,
         'current_trial_step': 1,
-        'created_at': datetime.now().isoformat()
+        'created_at': datetime.now().isoformat(),
+        'max_trials': selected_scenario['num_trials']
     }
     supabase.table('sessions').insert(session_data).execute()
     
     st.session_state.update({
         'page': 'intro',
-        'trial': 0,
+        'trial': 1,
         'trial_step': 1,
-        'scenario': scenario,
-        'ai_type': session_data['ai_type'],
-        'max_trials': session_data['max_trials'],
+        'scenario_id': selected_scenario['scenario_id'],
+        'max_trials': selected_scenario['num_trials'],
         'fund_returns': {},
-        'allocations': {}
+        'allocations': {},
+        'fund_returns_data': {fr['trial_number']: (fr['return_a'], fr['return_b']) for fr in fr_res.data},
+        'ai_recommendations_data': {ai['trial_number']: (ai['fund_a'], ai['fund_b']) for ai in ai_res.data}
     })
 
 def show_progress():
@@ -158,7 +136,6 @@ def show_progress():
 
 def show_intro():
     st.title("Experiment Introduction")
-    # Read the introduction text from the file
     intro_file_path = os.path.join("assets", "text", "introduction.txt")
     with open(intro_file_path, "r", encoding="utf-8") as f:
         intro_text = f.read()
@@ -169,13 +146,13 @@ def show_intro():
         update_session_progress()
         st.rerun()
 
-
 def handle_trial_steps():
-    if st.session_state.trial >= st.session_state.max_trials:
+    if st.session_state.trial > st.session_state.max_trials:
+        # means we've finished the last trial
         st.session_state.page = 'final'
         update_session_progress()
         st.rerun()
-    
+
     if st.session_state.trial_step == 1:
         show_initial_allocation()
     elif st.session_state.trial_step == 2:
@@ -185,14 +162,12 @@ def handle_trial_steps():
 
 def show_initial_allocation():
     st.title(f"Trial {st.session_state.trial + 1} - Step 1: Initial Allocation")
-    
     col1, col2 = st.columns(2)
     with col1:
-        st.image(os.path.join("assets", "images", "fund_A.png"), width = 200) 
+        st.image(os.path.join("assets", "images", "fund_A.png"), width=200) 
         initial_a = st.number_input("Allocation to Fund A (%)", 0, 100, 50, key=f"initial_a_{st.session_state.trial}")
-    
     with col2:
-        st.image(os.path.join("assets", "images", "fund_B.png"), width = 200)  
+        st.image(os.path.join("assets", "images", "fund_B.png"), width=200)  
         initial_b = 100 - initial_a
         st.write(f"Automatic allocation: {initial_b}%")
 
@@ -203,14 +178,14 @@ def show_initial_allocation():
         st.rerun()
 
 def show_ai_recommendation():
+    # Display the trial number as (trial + 1) for the user
     st.title(f"Trial {st.session_state.trial + 1} - Step 2: AI Recommendation")
     
+    # When accessing the AI recommendations from the DB,
+    # use trial + 1 because DB trial numbers start at 1.
+    current_trial = st.session_state.trial + 1  
     if st.session_state.allocations.get(st.session_state.trial, {}).get('ai') is None:
-        if st.session_state.ai_type == 'biased':
-            ai_a, ai_b = 0, 100
-        else:
-            ai_a = np.random.randint(0, 101)
-            ai_b = 100 - ai_a
+        ai_a, ai_b = st.session_state.ai_recommendations_data[current_trial]
         save_allocation(st.session_state.trial, 'ai', ai_a, ai_b)
         st.session_state.allocations[st.session_state.trial] = {
             'initial': st.session_state.allocations.get(st.session_state.trial, {}).get('initial'),
@@ -226,7 +201,6 @@ def show_ai_recommendation():
         st.subheader("Your Initial Allocation")
         st.write(f"Fund A: {initial_a}%")
         st.write(f"Fund B: {initial_b}%")
-    
     with col2:
         st.subheader("✨ AI Recommendation")
         st.write(f"Fund A: {ai_a}%")
@@ -237,12 +211,14 @@ def show_ai_recommendation():
     
     if st.button("Submit Final Allocation"):
         save_allocation(st.session_state.trial, 'final', adjusted_a, adjusted_b)
+        # Also look up fund returns using trial+1
+        return_a, return_b = st.session_state.fund_returns_data[st.session_state.trial + 1]
         
-        return_a = np.random.normal(0.11, 0.15)
-        return_b = np.random.normal(0.03, 0.05)
-        
-        # Update trial with returns
-        trial_response = supabase.table('trials').select('trial_id').eq('session_id', session_id).eq('trial_number', st.session_state.trial).execute()
+        trial_response = supabase.table('trials') \
+            .select('trial_id') \
+            .eq('session_id', session_id) \
+            .eq('trial_number', st.session_state.trial) \
+            .execute()
         trial_id = trial_response.data[0]['trial_id']
         supabase.table('trials').update({
             'return_a': float(return_a),
@@ -253,56 +229,39 @@ def show_ai_recommendation():
         update_session_progress()
         st.rerun()
 
+
 def show_performance():
     st.title(f"Trial {st.session_state.trial + 1} - Step 3: Performance")
-    
     trial_data = st.session_state.allocations[st.session_state.trial]
     return_a, return_b = st.session_state.fund_returns[st.session_state.trial]
     
     final_a, final_b = trial_data['final']
     final_return = (final_a/100)*return_a + (final_b/100)*return_b
-
-    # Calculate AI Portfolio return
     ai_a, ai_b = trial_data['ai']
     ai_return = (ai_a/100)*return_a + (ai_b/100)*return_b
 
-    # Convert to percentages
-    fund_a_perf = return_a * 100
-    fund_b_perf = return_b * 100
-    ai_perf = ai_return * 100
-    user_perf = final_return * 100
-
-    # Create DataFrame for plotting
     df = pd.DataFrame({
         'Category': ['Fund A', 'Fund B', 'AI Portfolio', 'User Portfolio'],
-        'Performance': [fund_a_perf, fund_b_perf, ai_perf, user_perf]
+        'Performance': [
+            return_a * 100, 
+            return_b * 100,
+            ai_return * 100,
+            final_return * 100
+        ]
     })
 
-    # Determine colors based on performance
-    colors = ['green' if perf >= 0 else 'red' for perf in df['Performance']]
-
-    # Create Plotly bar chart
     fig = go.Figure(data=[
         go.Bar(
             x=df['Category'],
             y=df['Performance'],
-            marker_color=colors,
+            marker_color=['green' if p >= 0 else 'red' for p in df['Performance']],
             text=[f"{val:.2f}%" for val in df['Performance']],
             textposition='outside'
         )
     ])
-
-    # Update layout for better presentation
-    fig.update_layout(
-        yaxis_title='Performance (%)',
-        showlegend=False,
-        margin=dict(t=20, b=20)  # Adjust margins to fit text
-    )
-
-    # Display the Plotly chart
+    fig.update_layout(yaxis_title='Performance (%)', showlegend=False, margin=dict(t=20, b=20))
     st.plotly_chart(fig, use_container_width=True)
 
-    # Button to proceed to next trial or final allocation
     btn_label = "Continue to Next Trial" if st.session_state.trial < st.session_state.max_trials - 1 else "Proceed to Final Allocation"
     if st.button(btn_label):
         st.session_state.trial += 1
@@ -312,26 +271,22 @@ def show_performance():
 
 def show_final():
     st.title("Final Allocation")
-    
     col1, col2 = st.columns(2)
     with col1:
-        st.image(os.path.join("assets", "images", "fund_A.png"), width= 200)  
+        st.image(os.path.join("assets", "images", "fund_A.png"), width=200)  
         final_a = st.number_input("Final allocation to Fund A (%)", 0, 100, 50)
-    
     with col2:
-        st.image(os.path.join("assets", "images", "fund_B.png"), width= 200) 
+        st.image(os.path.join("assets", "images", "fund_B.png"), width=200) 
         final_b = 100 - final_a
         st.write(f"Automatic allocation: {final_b}%")
     
     if st.button("Submit Final Allocation"):
-        return_a = np.random.normal(0.11, 0.15)
-        return_b = np.random.normal(0.03, 0.05)
+        current_trial = st.session_state.max_trials
+        return_a, return_b = st.session_state.fund_returns_data.get(current_trial, (0.11, 0.03))
         portfolio_return = (final_a/100)*return_a + (final_b/100)*return_b
         
-        # Save final allocation
         save_allocation(st.session_state.trial, 'final', final_a, final_b, portfolio_return)
         
-        # Update trial with returns
         trial_response = supabase.table('trials').select('trial_id').eq('session_id', session_id).eq('trial_number', st.session_state.trial).execute()
         trial_id = trial_response.data[0]['trial_id']
         supabase.table('trials').update({
