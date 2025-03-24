@@ -165,25 +165,24 @@ def show_demographics():
     other_countries = [c for c in all_countries if c not in priority_countries]
     country_list = priority_countries + sorted(other_countries)
     
-    with st.form("demographic_form"):
+    with st.form(key="demographic_form", enter_to_submit=False):
         st.write("Please answer the following questions before we begin:")
         
-        # Country selection
-        country = st.selectbox("Country of Residence", options=country_list)
+        # Country selection with placeholder option
+        country = st.selectbox("Country of Residence", options=["Select a country"] + country_list)
         
-        # Instructed response check
-        place_of_birth = st.text_input("Place of Birth", 
-                                      value="", 
-                                      key="birth_place")
-
-        # Demographic fields
-        gender = st.selectbox("Gender", options=[
-            "Male", "Female", "Non-binary", "Prefer not to say"
-        ], index=3)
+        # Place of Birth is optional
+        place_of_birth = st.text_input("Place of Birth", value="", key="birth_place")
         
-        age = st.number_input("Age", min_value=18, max_value=100, value=25)
+        # Gender selection with placeholder
+        gender = st.selectbox("Gender", options=["Select Gender", "Male", "Female", "Prefer not to say"])
         
+        # Use 0 as default for age to indicate no valid value has been set yet
+        age = st.number_input("Age", min_value=0, max_value=100, value=0, step=1)
+        
+        # Education level with placeholder option
         education_level = st.selectbox("Highest Level of Education", options=[
+            "Select Education Level",
             "Mandatory Education (Primary/Secondary)",
             "Vocational Education (EFZ, apprenticeship)",
             "Baccalaureate (Gymnasium)",
@@ -194,40 +193,63 @@ def show_demographics():
             "Other"
         ])
         
+        # AI proficiency radio buttons with a placeholder option
+        ai_options = ["Select AI proficiency"] + [
+            f"{i} - {['Novice','','','','','','Expert'][i-1]}" for i in range(1, 8)
+        ]
         ai_proficiency = st.radio(
             "How would you rate your proficiency with Artificial Intelligence?",
-            options=[1, 2, 3, 4, 5, 6, 7],
-            horizontal=True,
-            format_func=lambda x: f"{x} - {['Novice','','','','','','Expert'][x-1]}"
+            options=ai_options,
+            horizontal=True
         )
         
+        # Financial literacy radio buttons with a placeholder option
+        fin_options = ["Select Financial Literacy"] + [
+            f"{i} - {['Novice','','','','','','Expert'][i-1]}" for i in range(1, 8)
+        ]
         financial_literacy = st.radio(
             "How would you rate your financial literacy?",
-            options=[1, 2, 3, 4, 5, 6, 7],
-            horizontal=True,
-            format_func=lambda x: f"{x} - {['Novice','','','','','','Expert'][x-1]}"
+            options=fin_options,
+            horizontal=True
         )
+        
+        submit = st.form_submit_button("Submit Demographics")
+        
+        if submit:
+            # Validate that all required fields have valid selections
+            if (country == "Select a country" or
+                gender == "Select Gender" or
+                age == 0 or
+                education_level == "Select Education Level" or
+                ai_proficiency == "Select AI proficiency" or
+                financial_literacy == "Select Financial Literacy"):
+                
+                st.warning("Please fill in all required fields before submitting.")
+            else:
+                # Extract numeric values from the radio buttons
+                ai_value = int(ai_proficiency.split(" - ")[0])
+                fin_value = int(financial_literacy.split(" - ")[0])
+                
+                # Save demographic data (assuming save_demographics and supabase functions exist)
+                save_demographics({
+                    'country': country,
+                    'gender': gender,
+                    'age': age,
+                    'education_level': education_level,
+                    'ai_proficiency': ai_value,
+                    'financial_literacy': fin_value
+                })
+                
+                # Update instructed response status (place_of_birth is optional)
+                instructed_response = (place_of_birth.strip() == "")
+                supabase.table('sessions').update({
+                    'instructed_response_1_passed': instructed_response
+                }).eq('session_id', session_id).execute()
+                
+                st.session_state.page = 'trial'
+                update_session_progress()
+                st.rerun()
 
-        if st.form_submit_button("Submit Demographics"):
-            # Save demographic data
-            save_demographics({
-                'country': country,
-                'gender': gender,
-                'age': age,
-                'education_level': education_level,
-                'ai_proficiency': ai_proficiency,
-                'financial_literacy': financial_literacy
-            })
-            
-            # Update instructed response status
-            instructed_response = (place_of_birth.strip() == "")
-            supabase.table('sessions').update({
-                'instructed_response_1_passed': instructed_response
-            }).eq('session_id', session_id).execute()
-            
-            st.session_state.page = 'trial'
-            update_session_progress()
-            st.rerun()
 
 def handle_trial_steps():
     if st.session_state.trial >= st.session_state.max_trials:
@@ -412,14 +434,34 @@ def show_debrief():
     st.title("Study Complete")
     st.write("**Thank you for participating!**")
     
-    if st.checkbox("I consent to my data being used for research purposes"):
-        if st.button("Confirm Consent"):
-            supabase.table('sessions').update({
-                'completed_at': datetime.now().isoformat(),
-                'consent_given': True
-            }).eq('session_id', session_id).execute()
-            st.success("Consent confirmed. Thank you!")
-            st.balloons()
+    with st.container(border=True):
+        with st.form("data_quality"):
+            st.subheader("🧪 Data Quality Assessment")
+            st.write("Please help us improve future studies by answering one final question:")
+            
+            data_quality = st.radio(
+                "How would you rate the **accuracy and care** you put into your responses during this study?",
+                options=[1, 2, 3, 4, 5, 6, 7],
+                horizontal=True,
+                format_func=lambda x: f"{x} - {['Lowest Effort','','','Neutral','','','Highest Effort'][x-1]}"
+            )
+            
+            st.markdown("---")
+            consent_given = st.checkbox("I consent to my data being used for research purposes")
+            
+            if st.form_submit_button("🔒 Finalize Submission"):
+                # Update session with all final data
+                supabase.table('sessions').update({
+                    'completed_at': datetime.now().isoformat(),
+                    'consent_given': consent_given,
+                    'data_quality_rating': data_quality
+                }).eq('session_id', session_id).execute()
+                
+                if consent_given:
+                    st.success("Thank you for your participation! Your data has been saved.")
+                    st.balloons()
+                else:
+                    st.info("Your responses have been recorded but will not be used for research purposes.")
 
 def main():
     if st.session_state.page == 'intro':
