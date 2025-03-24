@@ -7,6 +7,7 @@ import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
 import plotly.graph_objects as go
+import pycountry
 
 # Load environment variables
 load_dotenv()
@@ -50,6 +51,15 @@ def save_allocation(trial_num, allocation_type, fund_a, fund_b, portfolio_return
         'fund_a': fund_a,
         'fund_b': fund_b,
         'portfolio_return': portfolio_return,
+        'created_at': datetime.now().isoformat()
+    }).execute()
+
+def save_demographics(data):
+    """Save demographic data to Supabase"""
+    supabase.table('demographics').insert({
+        'demographic_id': str(uuid.uuid4()),
+        'session_id': session_id,
+        **data,
         'created_at': datetime.now().isoformat()
     }).execute()
 
@@ -141,10 +151,67 @@ def show_intro():
         intro_text = f.read()
     st.write(intro_text)
     
-    if st.button("Begin Study"):
-        st.session_state.page = 'trial'
+    if st.button("Start Demographic Questionnaire"):
+        st.session_state.page = 'demographics'  
         update_session_progress()
         st.rerun()
+
+def show_demographics():
+    st.title("Demographic Questionnaire")
+    
+    # Get country list with Switzerland and Singapore first
+    all_countries = sorted([c.name for c in pycountry.countries])
+    priority_countries = ["Switzerland", "Singapore"]
+    other_countries = [c for c in all_countries if c not in priority_countries]
+    country_list = priority_countries + sorted(other_countries)
+    
+    with st.form("demographic_form"):
+        st.write("Please answer the following questions before we begin:")
+        
+        country = st.selectbox("Country of Residence", options=country_list)
+        gender = st.selectbox("Gender", options=[
+            "Male", "Female", "Prefer not to say"
+        ])
+        
+        age = st.number_input("Age", min_value=18, max_value=100, value=25)
+        
+        education_level = st.selectbox("Highest Level of Education", options=[
+            "Mandatory Education (Primary/Secondary)",
+            "Vocational Education (EFZ, apprenticeship)",
+            "Baccalaureate (Gymnasium)",
+            "Higher Vocational Education (PET, Diploma)",
+            "University (Bachelor's Degree)",
+            "University (Master's Degree)",
+            "Doctoral Degree (PhD)",
+            "Other"
+        ])
+        
+        ai_proficiency = st.radio(
+            "How would you rate your proficiency with Artificial Intelligence?",
+            options=[1, 2, 3, 4, 5, 6, 7],
+            horizontal=True,
+            format_func=lambda x: f"{x} - {['Novice','','','','','','Expert'][x-1]}"
+        )
+        
+        financial_literacy = st.radio(
+            "How would you rate your financial literacy?",
+            options=[1, 2, 3, 4, 5, 6, 7],
+            horizontal=True,
+            format_func=lambda x: f"{x} - {['Novice','','','','','','Expert'][x-1]}"
+        )
+
+        if st.form_submit_button("Submit Demographics"):
+            save_demographics({
+                'country': country,
+                'gender': gender,
+                'age': age,
+                'education_level': education_level,
+                'ai_proficiency': ai_proficiency,
+                'financial_literacy': financial_literacy
+            })
+            st.session_state.page = 'trial'
+            update_session_progress()
+            st.rerun()
 
 def handle_trial_steps():
     if st.session_state.trial >= st.session_state.max_trials:
@@ -314,6 +381,8 @@ def show_debrief():
 def main():
     if st.session_state.page == 'intro':
         show_intro()
+    elif st.session_state.page == 'demographics':
+        show_demographics()
     elif st.session_state.page == 'trial':
         handle_trial_steps()
     elif st.session_state.page == 'final':
@@ -321,7 +390,7 @@ def main():
     elif st.session_state.page == 'debrief':
         show_debrief()
     
-    if st.session_state.page != 'intro':
+    if st.session_state.page not in ['intro', 'demographics']:
         show_progress()
 
 if __name__ == "__main__":
