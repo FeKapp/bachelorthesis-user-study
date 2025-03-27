@@ -464,7 +464,8 @@ def show_debrief():
         country = st.selectbox("Country of Residence", options=["Select a country"] + country_list)
         gender = st.selectbox("Gender", options=["Select Gender", "Male", "Female", "non-binary", "prefer not to disclose", "prefer to self-describe"])
         if gender == "prefer to self-describe":
-            gender = st.text_input("Please specify", value="")
+            gender = st.text_input("Please specify", value="prefer to self-describe")
+
 
         age = st.number_input("Age", min_value=18, max_value=100, value=None, step=1)
         
@@ -503,6 +504,9 @@ def show_debrief():
                 validation_errors.append("Country of residence is required")
             if gender == "Select Gender":
                 validation_errors.append("Gender is required")
+            if gender == "prefer to self-describe":
+                validation_errors.append("Plese self-describe your gender")
+
             if age == None:
                 validation_errors.append("Age is required")
             if education_level == "Select Education Level":
