@@ -145,8 +145,8 @@ def show_progress():
         st.caption(f"Study progress: {int(progress*100)}% complete")
 
 def show_intro():
-    st.title("Experiment Introduction")
-    intro_file_path = os.path.join("assets", "text", "introduction.txt")
+    st.title("Experiment Description")
+    intro_file_path = os.path.join("assets", "text", "experiment_description.txt")
     with open(intro_file_path, "r", encoding="utf-8") as f:
         intro_text = f.read()
     st.write(intro_text)
@@ -265,6 +265,37 @@ def handle_trial_steps():
         show_ai_recommendation()
     elif st.session_state.trial_step == 3:
         show_performance()
+
+def show_consent():
+    st.title("Welcome!")
+    
+    with st.container(border=True):
+        # Load intro text from file
+        intro_file_path = os.path.join("assets", "text", "introduction.txt")
+        with open(intro_file_path, "r", encoding="utf-8") as i:
+            intro_text = i.read()
+        st.markdown(intro_text)
+        st.markdown("---")
+
+        # Load consent text from file
+        consent_file_path = os.path.join("assets", "text", "consent.txt")
+        with open(consent_file_path, "r", encoding="utf-8") as f:
+            consent_text = f.read()
+        st.markdown(consent_text)
+    
+        with st.form(key="consent_form"):
+            consent_given = st.checkbox("I agree to the consent form and to the processing of my personal data in accordance with the information provided herein.")
+            submitted = st.form_submit_button("Agree & Continue")
+            if submitted:
+                if consent_given:
+                    supabase.table('sessions').update({
+                        'consent_given': True,
+                        'current_page': 'intro'
+                    }).eq('session_id', session_id).execute()
+                    st.session_state.page = 'intro'
+                    st.rerun()
+                else:
+                    st.error("You must agree to participate to continue.")
 
 def show_initial_allocation():
     st.title(f"Trial {st.session_state.trial + 1} - Step 1: Initial Allocation")
@@ -462,10 +493,12 @@ def show_debrief():
         st.markdown("---")
         st.subheader("Demographic information")
         country = st.selectbox("Country of Residence", options=["Select a country"] + country_list)
+
+        place_of_birth = st.text_input("Place of Birth (optional)", value="", key="birth_place")
+
         gender = st.selectbox("Gender", options=["Select Gender", "Male", "Female", "non-binary", "prefer not to disclose", "prefer to self-describe"])
         if gender == "prefer to self-describe":
             gender = st.text_input("Please specify", value="prefer to self-describe")
-
 
         age = st.number_input("Age", min_value=18, max_value=100, value=None, step=1)
         
@@ -490,24 +523,17 @@ def show_debrief():
             options=["Yes", "No"],
             index=0
         )
-        comment = st.text_area("If you chose 'No', why do you think we should not use your data?",
-                             disabled=(use_data == "Yes"))
+        comment = st.text_area("If you chose 'No', why do you think we should not use your data?")
 
-        # Consent
-        st.markdown("---")
-        consent_given = st.checkbox("I consent to my data being used for research purposes")
-
-        if st.form_submit_button("🔒 Finalize Submission"):
-            # Validate required fields
+        if st.form_submit_button("Finalize Submission"):
             validation_errors = []
             if country == "Select a country":
                 validation_errors.append("Country of residence is required")
             if gender == "Select Gender":
                 validation_errors.append("Gender is required")
             if gender == "prefer to self-describe":
-                validation_errors.append("Plese self-describe your gender")
-
-            if age == None:
+                validation_errors.append("Please self-describe your gender")
+            if age is None:
                 validation_errors.append("Age is required")
             if education_level == "Select Education Level":
                 validation_errors.append("Education level is required")
@@ -526,31 +552,35 @@ def show_debrief():
                     'financial_literacy': financial_literacy
                 })
 
+                # Update instructed response status
+                instructed_response = (place_of_birth.strip() == "")
+                supabase.table('sessions').update({
+                    'instructed_response_1_passed': instructed_response
+                }).eq('session_id', session_id).execute()
+
                 # Update session with data quality and completion
                 supabase.table('sessions').update({
                     'completed_at': datetime.now().isoformat(),
-                    'consent_given': consent_given,
                     'data_quality': (use_data == "Yes"),
                     'data_quality_comment': comment if use_data == "No" else None
                 }).eq('session_id', session_id).execute()
 
-                if consent_given:
-                    st.success("Thank you for your participation! Your data has been saved.")
-                    st.balloons()
-                else:
-                    st.info("Your responses have been recorded but will not be used for research purposes.")
+                st.success("Thank you for your participation! Your data has been saved.")
+                st.balloons()
 
 def main():
-    # if st.session_state.page == 'intro':
+    # if st.session_state.page == 'consent':
+        show_consent()
+    # elif st.session_state.page == 'intro':
     #     show_intro()
     # elif st.session_state.page == 'trial':
     #     handle_trial_steps()
     # elif st.session_state.page == 'final':
     #     show_final()
     # elif st.session_state.page == 'debrief':
-        show_debrief()
+        # show_debrief()
     
-    # if st.session_state.page not in ['intro']:
+    # if st.session_state.page not in ['consent', 'intro']:
     #     show_progress()
 
 if __name__ == "__main__":
