@@ -117,7 +117,7 @@ else:
     session_data = {
         'session_id': session_id,
         'scenario_id': selected_scenario['scenario_id'],
-        'current_page': 'intro',
+        'current_page': 'consent',
         'current_trial': 0,
         'current_trial_step': 1,
         'created_at': datetime.now().isoformat(),
@@ -126,7 +126,7 @@ else:
     supabase.table('sessions').insert(session_data).execute()
     
     st.session_state.update({
-        'page': 'intro',
+        'page': 'consent',
         'trial': 1,
         'trial_step': 1,
         'scenario_id': selected_scenario['scenario_id'],
@@ -569,19 +569,19 @@ def show_debrief():
                 st.balloons()
 
 def main():
-    # if st.session_state.page == 'consent':
+    if st.session_state.page == 'consent':
         show_consent()
-    # elif st.session_state.page == 'intro':
-    #     show_intro()
-    # elif st.session_state.page == 'trial':
-    #     handle_trial_steps()
-    # elif st.session_state.page == 'final':
-    #     show_final()
-    # elif st.session_state.page == 'debrief':
-        # show_debrief()
+    elif st.session_state.page == 'intro':
+        show_intro()
+    elif st.session_state.page == 'trial':
+        handle_trial_steps()
+    elif st.session_state.page == 'final':
+        show_final()
+    elif st.session_state.page == 'debrief':
+        show_debrief()
     
-    # if st.session_state.page not in ['consent', 'intro']:
-    #     show_progress()
+    if st.session_state.page not in ['consent', 'intro']:
+        show_progress()
 
 if __name__ == "__main__":
     main()
