@@ -128,7 +128,7 @@ def show_ai_recommendation():
         save_allocation(
             st.query_params['session_id'],
             st.session_state.trial,
-            'final',
+            'post-ai',
             adjusted_a,
             adjusted_b
         )
