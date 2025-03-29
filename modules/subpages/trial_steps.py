@@ -61,4 +61,38 @@ def show_ai_recommendation(session_id, trial_num, scenario_id, allocations):
         st.session_state.trial_step = 3
         update_session_progress(
             session_id,
-      
+            page='trial',
+            trial=st.session_state.trial,
+            trial_step=st.session_state.trial_step
+        )
+        st.rerun()
+
+def show_performance(session_id, trial_num, fund_returns, allocations):
+    st.title(f"Trial {trial_num + 1} - Step 3: Performance")
+    return_a, return_b = fund_returns[trial_num]
+    final_a, final_b = allocations[trial_num]['final']
+    
+    performance_data = {
+        'Fund A': return_a * 100,
+        'Fund B': return_b * 100,
+        'AI Portfolio': (allocations[trial_num]['ai'][0]/100*return_a + 
+                        allocations[trial_num]['ai'][1]/100*return_b) * 100,
+        'Your Portfolio': (final_a/100*return_a + final_b/100*return_b) * 100
+    }
+    
+    st.plotly_chart(performance_chart(pd.DataFrame({
+        'Category': list(performance_data.keys()),
+        'Performance': list(performance_data.values())
+    })), use_container_width=True)
+
+    btn_label = "Continue" if trial_num < st.session_state.max_trials-1 else "Finish"
+    if st.button(btn_label):
+        st.session_state.trial += 1
+        st.session_state.trial_step = 1
+        update_session_progress(
+            session_id,
+            page='trial' if trial_num < st.session_state.max_trials-1 else 'final',
+            trial=st.session_state.trial,
+            trial_step=st.session_state.trial_step
+        )
+        st.rerun()
