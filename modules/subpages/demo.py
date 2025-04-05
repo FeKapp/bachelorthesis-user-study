@@ -49,25 +49,46 @@ def show_demo_ai():
         unsafe_allow_html=True
     )
 
+    # Display user and AI allocations
+    # initial_a, initial_b = st.session_state.allocations[st.session_state.trial]['initial']
+    # ai_a, ai_b = st.session_state.allocations[st.session_state.trial]['ai']
+    
+    initial_a = 50
+    initial_b = 50
+    ai_a = st.session_state.demo_data['ai_a']
+    ai_b = st.session_state.demo_data['ai_b']
+
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("Your Initial Allocation")
-        st.write("Fund A: 50%")
-        st.write("Fund B: 50%")
+        with st.container(border=True):
+            st.subheader("Your Initial Allocation")
+            st.metric("Fund A:", f"{initial_a}%")
+            st.metric("Fund B:", f"{initial_b}%")
+        
     with col2:
-        st.subheader("✨ AI Recommendation")
-        st.write(f"Fund A: {st.session_state.demo_data['ai_a']}%")
-        st.write(f"Fund B: {st.session_state.demo_data['ai_b']}%")
+        with st.container(border=True):
+            st.subheader("AI Recommendation ✨")
+            st.metric("Fund A:", f"{ai_a}%")
+            st.metric("Fund B:", f"{ai_b}%")
+            
+    st.markdown("---")
+    st.markdown("Based on your initial allocation and the AI recommendation, how do you allocate your assets?")
+    col3, col4 = st.columns(2)
+    with col3:
+        adjusted_a = st.number_input("Allocation to Fund A (%)", min_value=0, max_value=100, value= None, key="adjusted_a")
 
-    adjusted_a = st.number_input("Revised allocation to Fund A (%)", 0, 100, 50, key="demo_adjusted_a")
-    # adjusted_b
-    _ = 100 - adjusted_a
+    with col4:
+        adjusted_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - adjusted_a) if adjusted_a is not None else 0, key="adjusted_b", disabled=True)
+        st.write(f"Automatic allocation: {adjusted_b}%")
 
-    if st.button("Next: Performance Demo"):
-        st.session_state.trial_step = 3
-        update_session_progress(st.query_params['session_id'])
-        st.rerun()
-
+    if st.button("Submit Allocation"):
+        if adjusted_a is None:
+            st.error("Allocation to Fund A is required.")
+        else:
+            st.session_state.trial_step = 3
+            update_session_progress(st.query_params['session_id'])
+            st.rerun()
+    
 def show_demo_performance():
     st.title("Demo: Performance Overview")
     st.markdown(
