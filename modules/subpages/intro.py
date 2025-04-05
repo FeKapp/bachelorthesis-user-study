@@ -22,9 +22,9 @@ def show_intro():
     if st.button("Start Demo"):
         # Generate random demo data
         st.session_state.demo_data = {
-            'ai_a': np.random.randint(0, 101),
-            'return_a': np.random.uniform(-0.1, 0.2),
-            'return_b': np.random.uniform(-0.1, 0.2),
+            'ai_a': np.random.randint(40, 61),
+            'return_a': np.random.uniform(0, 0.1),
+            'return_b': np.random.uniform(0, 0.1),
         }
         st.session_state.demo_data['ai_b'] = 100 - st.session_state.demo_data['ai_a']
         st.session_state.page = 'demo'
