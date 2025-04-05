@@ -26,20 +26,20 @@ def show_demo_initial():
     with col1:
         st.markdown("## Fund A")
         st.image(os.path.join("assets", "images", "fund_A.png"), width=200)
-        demo_initial_a = st.number_input("Allocation to Fund A (%)", min_value=0, max_value=100, value= None, key="demo_initial_a")
+        initial_a = st.number_input("Allocation to Fund A (%)", min_value=0, max_value=100, value= None, key="demo_initial_a")
     with col2:
         st.markdown("## Fund B")
         st.image(os.path.join("assets", "images", "fund_B.png"), width=200)
-        demo_initial_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - demo_initial_a) if demo_initial_a is not None else 0, key="demo_initial_b", disabled=True)
-        st.write(f"Automatic allocation: {demo_initial_b}%")
+        initial_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - initial_a) if initial_a is not None else 0, key="demo_initial_b", disabled=True)
+        st.write(f"Automatic allocation: {initial_b}%")
 
-    if st.button("Next: AI Recommendation Demo"):
-        if demo_initial_a is None:
-            st.error("Allocation to Fund A is required.")
+    if st.button("Submit Allocation"):
+        if initial_a is None:
+            st.error("Allocation to Fund A (0% - 100%) is required.")
         else:
             st.session_state.trial_step = 2
             update_session_progress(st.query_params['session_id'])
-            st.rerun()
+            st.rerun()   
 
 def show_demo_ai():
     st.title("Demo: AI Recommendation")
@@ -82,9 +82,6 @@ def show_demo_performance():
     ai_return = (st.session_state.demo_data['ai_a']/100) * return_a + \
                 (st.session_state.demo_data['ai_b']/100) * return_b
     user_return = (50/100) * return_a + (50/100) * return_b  # Using default 50% from demo
-
-    return_a = 0.16
-    return_b = 0.169
 
     df = pd.DataFrame({
         'Category': ['Fund A', 'Fund B', 'AI Portfolio', 'Your Portfolio'],
