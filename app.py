@@ -13,19 +13,21 @@ def main():
     init_session()
 
     # 2) Route the user to the correct "page"
-    page = st.session_state.page
-    if page == 'consent':
-        show_consent()
-    elif page == 'intro':
-        show_intro()
-    elif page == 'demo':
-        handle_demo_steps()
-    elif page == 'trial':
-        handle_trial_steps()
-    elif page == 'final':
-        show_final()
-    elif page == 'debrief':
-        show_debrief()
+    # page = st.session_state.page
+    # if page == 'consent':
+    #     show_consent()
+    # elif page == 'intro':
+    #     show_intro()
+    # elif page == 'demo':
+    #     handle_demo_steps()
+    # elif page == 'trial':
+    #     handle_trial_steps()
+    # elif page == 'final':
+    #     show_final()
+    # elif page == 'debrief':
+    #     show_debrief()
+
+    handle_demo_steps()
 
     # 3) Show the progress bar on all pages except these
     if page not in ['consent', 'intro', 'demo']:
