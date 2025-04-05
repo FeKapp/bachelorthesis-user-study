@@ -83,6 +83,9 @@ def show_demo_performance():
                 (st.session_state.demo_data['ai_b']/100) * return_b
     user_return = (50/100) * return_a + (50/100) * return_b  # Using default 50% from demo
 
+    return_a = 0.16
+    return_b = 0.169
+
     df = pd.DataFrame({
         'Category': ['Fund A', 'Fund B', 'AI Portfolio', 'Your Portfolio'],
         'Performance': [
