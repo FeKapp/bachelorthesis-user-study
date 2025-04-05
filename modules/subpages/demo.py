@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_theme import st_theme
 import numpy as np
 import pandas as pd
 import os
@@ -23,11 +24,12 @@ def show_demo_initial():
 
     col1, col2 = st.columns(2)
     with col1:
+        st.markdown("## Fund A")
         st.image(os.path.join("assets", "images", "fund_A.png"), width=200)
         demo_initial_a = st.number_input("Allocation to Fund A (%)", min_value=0, max_value=100, value= None, key="demo_initial_a")
     with col2:
+        st.markdown("## Fund B")
         st.image(os.path.join("assets", "images", "fund_B.png"), width=200)
-
         demo_initial_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - demo_initial_a) if demo_initial_a is not None else 0, key="demo_initial_b", disabled=True)
         st.write(f"Automatic allocation: {demo_initial_b}%")
 
