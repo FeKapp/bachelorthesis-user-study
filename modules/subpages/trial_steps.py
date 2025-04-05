@@ -35,7 +35,7 @@ def show_initial_allocation():
 
     if st.button("Submit Initial Allocation"):
         if initial_a is None:
-            st.error("Allocation to Fund A is required.")
+            st.error("Allocation to Fund A (0% - 100%) is required.")
         else:
             save_allocation(
                 st.query_params['session_id'],
@@ -107,9 +107,8 @@ def show_ai_recommendation():
 
             if is_instructed_trial:
                 st.markdown("""
-                    **Special Instruction** 
-                    For this trial only:  
-                    You **MUST** allocate **exactly 55% to Fund A** and 45% to Fund B**  
+                    **Special Instruction** For this trial only:  
+                    You **MUST** allocate **exactly 55% to Fund A** and 45% to **Fund B**  
                     This is a test of following instructions and does not affect your performance.
                     The real AI recommendation will be shown after you submit this trial.
                 """)
