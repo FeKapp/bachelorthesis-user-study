@@ -1,7 +1,8 @@
 import streamlit as st
 from modules.session import init_session
 from modules.subpages.consent import show_consent
-from modules.subpages.demo import handle_demo_steps, show_intro
+from modules.subpages.demo import handle_demo_steps
+from modules.subpages.intro import show_intro
 from modules.subpages.trial_steps import handle_trial_steps
 from modules.subpages.final import show_final, show_debrief
 from modules.subpages.demographics import show_demographics
