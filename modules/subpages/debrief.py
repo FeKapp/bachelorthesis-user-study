@@ -35,7 +35,7 @@ def show_debrief():
         st.subheader("Demographic information")
         country = st.selectbox("Country of Residence", options=["Select a country"] + country_list)
 
-        place_of_birth = st.text_input("Place of Birth (optional)", value="", key="birth_place")
+        # place_of_birth = st.text_input("Place of Birth (optional)", value="", key="birth_place")
 
         gender = st.selectbox(
             "Gender",
@@ -99,10 +99,10 @@ def show_debrief():
                 })
 
                 # Update "instructed response" (place_of_birth is optional)
-                instructed_response = (place_of_birth.strip() == "")
-                supabase.table('sessions').update({
-                    'instructed_response_1_passed': instructed_response
-                }).eq('session_id', st.query_params['session_id']).execute()
+                # instructed_response = (place_of_birth.strip() == "")
+                # supabase.table('sessions').update({
+                #     'instructed_response_1_passed': instructed_response
+                # }).eq('session_id', st.query_params['session_id']).execute()
 
                 # Mark session as complete
                 supabase.table('sessions').update({

@@ -24,16 +24,20 @@ def show_demo_initial():
     col1, col2 = st.columns(2)
     with col1:
         st.image(os.path.join("assets", "images", "fund_A.png"), width=200)
-        demo_initial_a = st.number_input("Allocation to Fund A (%)", 0, 100, 50, key="demo_initial_a")
+        demo_initial_a = st.number_input("Allocation to Fund A (%)", min_value=0, max_value=100, value= None, key="demo_initial_a")
     with col2:
         st.image(os.path.join("assets", "images", "fund_B.png"), width=200)
-        demo_initial_b = 100 - demo_initial_a
+
+        demo_initial_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - demo_initial_a) if demo_initial_a is not None else 0, key="demo_initial_b", disabled=True)
         st.write(f"Automatic allocation: {demo_initial_b}%")
 
     if st.button("Next: AI Recommendation Demo"):
-        st.session_state.trial_step = 2
-        update_session_progress(st.query_params['session_id'])
-        st.rerun()
+        if demo_initial_a is None:
+            st.error("Allocation to Fund A is required.")
+        else:
+            st.session_state.trial_step = 2
+            update_session_progress(st.query_params['session_id'])
+            st.rerun()
 
 def show_demo_ai():
     st.title("Demo: AI Recommendation")
