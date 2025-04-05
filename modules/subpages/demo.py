@@ -96,7 +96,7 @@ def show_demo_performance():
     fig = create_performance_bar_chart(df, margin=dict(t=20, b=20))
     st.plotly_chart(fig, use_container_width=True)
 
-    if st.button("Start Real Experiment"):
+    if st.button("Start Experiment"):
         st.session_state.page = 'trial'
         st.session_state.trial_step = 1
         update_session_progress(st.query_params['session_id'])
