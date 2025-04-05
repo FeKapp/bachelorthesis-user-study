@@ -4,8 +4,8 @@ from modules.subpages.consent import show_consent
 from modules.subpages.demo import handle_demo_steps
 from modules.subpages.intro import show_intro
 from modules.subpages.trial_steps import handle_trial_steps
-from modules.subpages.final import show_final, show_debrief
-from modules.subpages.demographics import show_demographics
+from modules.subpages.final import show_final
+from modules.subpages.debrief import show_debrief
 from modules.components.progress import show_progress
 
 def main():
@@ -26,8 +26,6 @@ def main():
         show_final()
     elif page == 'debrief':
         show_debrief()
-    elif page == 'demographics':
-        show_demographics()
 
     # 3) Show the progress bar on all pages except these
     if page not in ['consent', 'intro', 'demo']:
