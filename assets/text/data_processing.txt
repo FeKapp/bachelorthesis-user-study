@@ -1,0 +1,22 @@
+## Information about Data Processing
+
+**How long will your personal data be processed?**
+
+Your anonymized data will be stored indefinitely.
+
+**What personal data will be collected and used?**
+
+- Country of residence
+- Gender
+- Age
+- Educational level
+- AI expertise
+- Financial literacy
+
+**Who will have access to your personal data**
+
+Your data is accessible to the conductor of this study and may be shared in anonymized form with academic researchers for non-profit research. It might be part of academic papers, presentations, or lectures but only in an anonymized form (e.g., numbers).
+
+**Your right to withdraw consent**
+
+You have the right to withdraw consent at any time during the study for any reason. After data collection for the study has been completed and anonymization of data has taken place, your data cannot be deleted anymore due to technical reasons.

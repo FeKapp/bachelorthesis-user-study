@@ -5,33 +5,6 @@ import os
 from modules.database import supabase, update_session_progress
 from modules.components.charts import create_performance_bar_chart
 
-def show_intro():
-    st.title("Experiment Description")
-    intro_file_path = os.path.join("assets", "text", "experiment_description.txt")
-    with open(intro_file_path, "r", encoding="utf-8") as f:
-        intro_text = f.read()
-    st.write(intro_text)
-
-    if st.button("Start Experiment"):
-        # Generate random demo data
-        st.session_state.demo_data = {
-            'ai_a': np.random.randint(0, 101),
-            'return_a': np.random.uniform(-0.1, 0.2),
-            'return_b': np.random.uniform(-0.1, 0.2),
-        }
-        st.session_state.demo_data['ai_b'] = 100 - st.session_state.demo_data['ai_a']
-        st.session_state.page = 'demo'
-        st.session_state.trial_step = 1
-
-        # Immediately update the DB to reflect "demo"
-        supabase.table('sessions').update({
-            'current_page': 'demo',
-            'current_trial': st.session_state.trial,
-            'current_trial_step': st.session_state.trial_step
-        }).eq('session_id', st.query_params['session_id']).execute()
-
-        st.rerun()
-
 def handle_demo_steps():
     if st.session_state.trial_step == 1:
         show_demo_initial()

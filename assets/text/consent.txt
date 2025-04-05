@@ -6,11 +6,12 @@ To take part in the study, the following requirements must be met:
 - You are over 18 years old and assent to participate in this survey  
 - You have a good comprehension of English    
 
-# Information Privacy
+**Information Privacy**
 
-Information collected in this project may be shared with other researchers, but we will not share any information that could identify you. All data will be handled confidentially and anonymously.
+Information collected in this project may be shared with other researchers, but we will not share any information that could identify you. 
+All data will be handled confidentially and anonymously.
 
-# How to Contact Us
+**How to Contact Us**
 
 If you have any questions pertaining to this survey, feel free to contact:  
 **Felix Kappeler**: [felix.kappeler@student.unisg.com](mailto:felix.kappeler@student.unisg.com)

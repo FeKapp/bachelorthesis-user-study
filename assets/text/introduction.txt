@@ -1,1 +1,17 @@
 ## Introduction
+
+Please read this introduction carefully before starting the survey. This survey is part of a bachelor project of the HCI research group at the University of St. Gallen, Switzerland.
+
+**Purpose:**  
+The aim of the study is to evaluate an Artificial Intelligence (AI) financial asset recommendation tool for investment decisions for laypeople. If you agree to be part of the research study, you will be asked to use the tool powered by newly developed AI algorithms to make investment decisions. Then, at the end of the study, you will be asked some questions about your demographics. 
+
+**Benefits of the research:**  
+You are helping us expand the knowledge of AI financial asset recommendation tools. Otherwise, there are no direct benefits to participating.
+
+**Risks and discomforts:**  
+There are no known risks that could arise from participating in this survey.
+
+**Right to refuse or terminate participation:**  
+Participating in this study is completely voluntary. Even if you decide to participate now, you may change your mind and stop anytime. You may choose not to continue with the survey for any reason. Note that after completing the survey, your anonymized data will be stored indefinitely.
+
+Thank you for making a valuable contribution to research!
