@@ -20,7 +20,7 @@ def handle_trial_steps():
         show_performance()
 
 def show_initial_allocation():
-    st.title(f"Trial {st.session_state.trial + 1} - Step 1: Initial Allocation")
+    st.title(f"Trial {st.session_state.trial} - Step 1: Initial Allocation")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -33,7 +33,7 @@ def show_initial_allocation():
         initial_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - initial_a) if initial_a is not None else 0, key="demo_initial_b", disabled=True)
         st.write(f"Automatic allocation: {initial_b}%")
 
-    if st.button("Submit Initial Allocation"):
+    if st.button("Submit Allocation"):
         if initial_a is None:
             st.error("Allocation to Fund A (0% - 100%) is required.")
         else:
@@ -49,7 +49,7 @@ def show_initial_allocation():
             st.rerun()
 
 def show_ai_recommendation():
-    st.title(f"Trial {st.session_state.trial + 1} - Step 2: AI Recommendation")
+    st.title(f"Trial {st.session_state.trial} - Step 2: AI Recommendation")
 
     # Query scenario to check if we need an instructed response
     scenario_res = supabase.table('scenario_config') \
@@ -125,7 +125,7 @@ def show_ai_recommendation():
         adjusted_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - adjusted_a) if adjusted_a is not None else 0, key="adjusted_b", disabled=True)
         st.write(f"Automatic allocation: {adjusted_b}%")
 
-    if st.button("Submit Final Allocation"):
+    if st.button("Submit Allocation"):
         if adjusted_a is None:
             st.error("Allocation to Fund A is required.")
         else:
@@ -164,7 +164,7 @@ def show_ai_recommendation():
             st.rerun()
 
 def show_performance():
-    st.title(f"Trial {st.session_state.trial + 1} - Step 3: Performance")
+    st.title(f"Trial {st.session_state.trial} - Step 3: Performance")
 
     trial_data = st.session_state.allocations[st.session_state.trial]
     return_a, return_b = st.session_state.fund_returns[st.session_state.trial]
