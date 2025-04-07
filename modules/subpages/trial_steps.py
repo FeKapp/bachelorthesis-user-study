@@ -22,6 +22,14 @@ def handle_trial_steps():
 def show_initial_allocation():
     st.title(f"Trial {st.session_state.trial} - Step 1: Initial Allocation")
 
+     # Get the session State Scenario
+    scenario = st.session_state.get('scenario_id')
+    # Insert the scenario_id for the scenario "long" from the database
+    if scenario == '2e1e164a-699c-4c00-acff-61a98e23ddec' or 'b8426ff5-c6f2-4f25-a259-764e993ffa29':
+        st.markdown("Please allocate your assets to Fund A (0-100%) and Fund B (0-100%) for the **next financial period**.")
+    else:
+        st.markdown("Please allocate your assets to Fund A (0-100%) and Fund B (0-100%) for the **next 20 financial periods**.")
+    
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("## Fund A")
@@ -31,7 +39,7 @@ def show_initial_allocation():
         st.markdown("## Fund B")
         st.image(os.path.join("assets", "images", "fund_B.png"), width=200)
         initial_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - initial_a) if initial_a is not None else 0, key="demo_initial_b", disabled=True)
-        st.write(f"Automatic allocation: {initial_b}%")
+        # st.write(f"Automatic allocation: {initial_b}%")
 
     if st.button("Submit Allocation"):
         if initial_a is None:
@@ -123,7 +131,7 @@ def show_ai_recommendation():
 
     with col4:
         adjusted_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - adjusted_a) if adjusted_a is not None else 0, key="adjusted_b", disabled=True)
-        st.write(f"Automatic allocation: {adjusted_b}%")
+        # st.write(f"Automatic allocation: {adjusted_b}%")
 
     if st.button("Submit Allocation"):
         if adjusted_a is None:
@@ -184,6 +192,21 @@ def show_performance():
             final_return * 100
         ]
     })
+
+    scenario = st.session_state.get('scenario_id')
+    # Insert the scenario_id for the scenario "long" from the database
+    if scenario == '2e1e164a-699c-4c00-acff-61a98e23ddec' or 'b8426ff5-c6f2-4f25-a259-764e993ffa29':
+        duration = "last financial period"
+    else:
+        duration = "last 20 financial periods"
+
+    st.markdown(f"""
+    Allocation breakdown:
+    - Your Portfolio: **Fund A**: {final_a}%, **Fund B**: {final_b}%
+    - AI portfolio: **Fund A**: {ai_a}%, **Fund B**: {ai_b}%""")
+
+    st.markdown(f"Overview how Fund A, Fund B, the AI portfolio and your portfolio performed in the **{duration}**:")
+    
 
     fig = create_performance_bar_chart(df, margin=dict(t=20, b=20))
     st.plotly_chart(fig, use_container_width=True)

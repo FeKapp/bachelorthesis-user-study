@@ -108,7 +108,7 @@ def show_demo_ai():
     - :red[On the left side under **Your Initial Allocation**, you will see your initial allocation in the previous step.]
     - :red[On the right side under **AI Recommendation**, you will see the AI's suggested allocation.]
     - :red[Based on this information, you can adjust your allocation to Fund A (0-100%) or re-enter your initial allocation.]
-    - :red[Note: The AI recommendation ** here in the demo** is randomly generated for illustration purpose. The real values will be shown as soon as the experiment starts.]
+    - :red[Note: The AI recommendation **here in the demo** is randomly generated for illustration purpose. The real values will be shown as soon as the experiment starts.]
     - :red[Once you have entered your allocation, click on **Submit Allocation**.]
     """)
 
@@ -138,18 +138,18 @@ def show_demo_ai():
     st.markdown("Based on your initial allocation and the AI recommendation, how do you allocate your assets?")
     col3, col4 = st.columns(2)
     with col3:
-        adjusted_a = st.number_input("Allocation to Fund A (%)", min_value=0, max_value=100, value= None, key="adjusted_a")
+        final_a = st.number_input("Allocation to Fund A (%)", min_value=0, max_value=100, value= None, key="adjusted_a")
 
     with col4:
-        adjusted_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - adjusted_a) if adjusted_a is not None else 0, key="adjusted_b", disabled=True)
+        final_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - final_a) if final_a is not None else 0, key="adjusted_b", disabled=True)
         # st.write(f"Automatic allocation: {adjusted_b}%")
 
     if st.button("Submit Allocation"):
-        if adjusted_a is None:
+        if final_a is None:
             st.error("Allocation to Fund A is required.")
         else:
-            st.session_state.demo_data['adjusted_a'] = adjusted_a
-            st.session_state.demo_data['adjusted_b'] = adjusted_b
+            st.session_state.demo_data['final_a'] = final_a
+            st.session_state.demo_data['final_b'] = final_b
 
             st.session_state.trial_step = 3
             update_session_progress(st.query_params['session_id'])
@@ -164,21 +164,21 @@ def show_demo_performance():
     - :red[In the allocation breakdown, you can see your and the AI's allocation to Fund A and Fund B.]
     - :red[In the bar chart, you can see the performance for the given investment period of Fund A, Fund B, the AI suggested portfolio, and your portfolio.]
     - :red[The bar in the chart will be green if the performance is positive and red if it is negative.]
-    - :red[Note: The returns of Fund A and Fund B ** here in the demo** are randomly generated for illustration purpose. The real values will be shown as soon as the experiment starts.]
+    - :red[Note: The returns of Fund A and Fund B **here in the demo** are randomly generated for illustration purpose. The real values will be shown as soon as the experiment starts.]
     - :red[To terminate the demo and start with the experiment, click on **Start Experiment**.]
     """)
 
     # Calculate returns using demo data
     return_a = st.session_state.demo_data['return_a']
     return_b = st.session_state.demo_data['return_b']
-    allocated_a = st.session_state.demo_data['adjusted_a']
-    allocated_b = st.session_state.demo_data['adjusted_b']
+    final_a = st.session_state.demo_data['final_a']
+    final_b = st.session_state.demo_data['final_b']
     ai_a = st.session_state.demo_data['ai_a']
     ai_b = st.session_state.demo_data['ai_b']
 
     ai_return = (ai_a/100) * return_a + \
                 (ai_b/100) * return_b
-    user_return = (allocated_a/100) * return_a +  (allocated_b/100) * return_b  
+    user_return = (final_a/100) * return_a +  (final_b/100) * return_b  
 
     df = pd.DataFrame({
         'Category': ['Fund A', 'Fund B', 'AI Portfolio', 'Your Portfolio'],
@@ -199,7 +199,7 @@ def show_demo_performance():
 
     st.markdown(f"""
     Allocation breakdown:
-    - Your Portfolio: **Fund A**: {allocated_a}%, **Fund B**: {allocated_b}%
+    - Your Portfolio: **Fund A**: {final_a}%, **Fund B**: {final_b}%
     - AI portfolio: **Fund A**: {ai_a}%, **Fund B**: {ai_b}%""")
 
     st.markdown(f"Overview how Fund A, Fund B, the AI portfolio and your portfolio performed in the **{duration}**:")
@@ -207,6 +207,7 @@ def show_demo_performance():
     fig = create_performance_bar_chart(df, margin=dict(t=20, b=20))
     st.plotly_chart(fig, use_container_width=True)
 
+    st.markdown(":red[This is the end of the demo. You can now start the experiment.]")
 
     if st.button("Start Experiment"):
         st.session_state.page = 'trial'
