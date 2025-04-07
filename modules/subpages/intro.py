@@ -4,8 +4,23 @@ import numpy as np
 from modules.database import supabase
 from modules.database import update_session_progress
 
+def scroll_to_top():
+    st.markdown(
+        """
+        <script>
+            window.onload = function() {
+                /* Scroll the parent container (the main section) to the top: */
+                window.parent.document.querySelector('section.main').scrollTo(0, 0);
+            }
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+
 def show_intro():
     st.title("Experiment Description")
+
+    scroll_to_top()
 
     # Get the session State Scenario
     scenario = st.session_state.get('scenario_id')

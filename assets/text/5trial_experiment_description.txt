@@ -1,4 +1,4 @@
-In this experiment, you will be asked to make several financial investment decisions. Imagine that you have recently inherited some money, and your goal is to invest that money to earn the best possible return. Every 20 financial periods (a specific period during which your investment grows or declines), you will decide how much of your money to allocate between two investment options, called **Fund A** and **Fund B**. The performance of the two funds is not yet known, but you will be able to observe it during the experiment.
+In this experiment, you will be asked to make several financial investment decisions. Imagine that you have recently inherited some money, and your goal is to invest that money to earn the best possible return. Every 20 financial periods (specific periods during which your investment grows or declines), you will decide how much of your money to allocate between two investment options, called **Fund A** and **Fund B**. The performance of the two funds is not yet known, but you will be able to observe it during the experiment.
 
 Each investment decision for a financial period has **3 phases**:
 
