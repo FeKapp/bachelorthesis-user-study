@@ -6,9 +6,17 @@ def show_progress():
     else:
         progress = min((st.session_state.trial - 1) / st.session_state.max_trials, 1.0)
 
+    # Add custom CSS for the progress bar
+    st.markdown("""
+    <style>
+        .stProgress > div > div > div > div {
+            background-color: #0056b3;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
     with st.container():
         # st.markdown("<br><br>", unsafe_allow_html=True)
         # st.caption(f"Study progress: {int(progress * 100)}% complete")
-        st.caption(f"Study progress:")
-        st.progress(progress)
+        st.progress(progress, "Study progress:")
         
