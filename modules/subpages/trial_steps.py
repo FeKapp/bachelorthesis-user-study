@@ -4,219 +4,183 @@ import pandas as pd
 from modules.database import supabase, update_session_progress, save_allocation
 from modules.components.charts import create_performance_bar_chart
 
+# Cache expensive chart creation
+@st.cache_data(max_entries=100)
+def cached_performance_chart(df):
+    return create_performance_bar_chart(df, margin=dict(t=20, b=20))
+
 def handle_trial_steps():
-    # Check if we've finished all trials
+    session_id = st.query_params['session_id']
+    
     if st.session_state.trial >= st.session_state.max_trials:
         st.session_state.page = 'final'
-        update_session_progress(st.query_params['session_id'])
+        update_session_progress(session_id)
         st.rerun()
 
-    # Route to the correct trial step
-    if st.session_state.trial_step == 1:
-        show_initial_allocation()
-    elif st.session_state.trial_step == 2:
-        show_ai_recommendation()
-    elif st.session_state.trial_step == 3:
-        show_performance()
+    step_handlers = {
+        1: show_initial_allocation,
+        2: show_ai_recommendation,
+        3: show_performance
+    }
+    step_handlers.get(st.session_state.trial_step, show_initial_allocation)()
 
 def show_initial_allocation():
-    st.title(f"Trial {st.session_state.trial} - Step 1: Initial Allocation")
-
-     # Get the session State Scenario
-    scenario = st.session_state.get('scenario_id')
-    # Insert the scenario_id for the scenario "long" from the database
-    if scenario == '2e1e164a-699c-4c00-acff-61a98e23ddec' or 'b8426ff5-c6f2-4f25-a259-764e993ffa29':
-        st.markdown("Please allocate your assets to Fund A (0-100%) and Fund B (0-100%) for the **next financial period**.")
-    else:
-        st.markdown("Please allocate your assets to Fund A (0-100%) and Fund B (0-100%) for the **next 20 financial periods**.")
+    session_id = st.query_params['session_id']
+    current_trial = st.session_state.trial
+    scenario_id = st.session_state.scenario_id
     
+    # Get period information from scenario_config
+    periods = "financial period" if st.session_state.max_trials == 100 else "20 financial periods"
+    
+    st.title(f"Trial {current_trial} - Step 1: Initial Allocation")
+    st.markdown(f"Please allocate your assets for the **next {periods}**.")
+
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("## Fund A")
         st.image(os.path.join("assets", "images", "fund_A.png"), width=200)
-        initial_a = st.number_input("Allocation to Fund A (%)", min_value=0, max_value=100, value= None, key="demo_initial_a")
+        initial_a = st.number_input("Allocation to Fund A (%)", 
+                                  min_value=0, max_value=100, 
+                                  value=None, key=f"initial_a_{current_trial}")
+        
     with col2:
         st.markdown("## Fund B")
         st.image(os.path.join("assets", "images", "fund_B.png"), width=200)
-        initial_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - initial_a) if initial_a is not None else 0, key="demo_initial_b", disabled=True)
-        # st.write(f"Automatic allocation: {initial_b}%")
+        initial_b = 100 - initial_a if initial_a is not None else 0
+        st.number_input("Automatic allocation to Fund B (%)", 
+                      min_value=0, max_value=100, 
+                      value=initial_b, key=f"initial_b_{current_trial}", disabled=True)
 
-    if st.button("Submit Allocation"):
+    if st.button("Submit Allocation", key=f"initial_btn_{current_trial}"):
         if initial_a is None:
             st.error("Allocation to Fund A (0% - 100%) is required.")
-        else:
-            save_allocation(
-                st.query_params['session_id'],
-                st.session_state.trial,
-                'initial',
-                initial_a,
-                initial_b
-            )
-            st.session_state.trial_step = 2
-            update_session_progress(st.query_params['session_id'])
-            st.rerun()
+            return
 
-def show_ai_recommendation():
-    st.title(f"Trial {st.session_state.trial} - Step 2: AI Recommendation")
-
-    # Query scenario to check if we need an instructed response
-    scenario_res = supabase.table('scenario_config') \
-        .select('*') \
-        .eq('scenario_id', st.session_state.scenario_id) \
-        .execute()
-    scenario = scenario_res.data[0]
-
-    # Check if this is an instructed response trial
-    is_instructed_trial = (
-        (scenario['num_trials'] == 5 and st.session_state.trial == 3) or
-        (scenario['num_trials'] == 100 and st.session_state.trial == 79)
-    )
-
-    current_trial_index = st.session_state.trial + 1
-
-    # If the AI allocation wasn't already saved, save it
-    if st.session_state.allocations.get(st.session_state.trial, {}).get('ai') is None:
-        if is_instructed_trial:
-            # Hardcoded instructed response
-            ai_a, ai_b = 55, 45
-                
-        else:
-            ai_a, ai_b = st.session_state.ai_recommendations_data[current_trial_index]
-
-        save_allocation(
-            st.query_params['session_id'],
-            st.session_state.trial,
-            'ai',
-            ai_a,
-            ai_b
-        )
-
-        # Update local session_state
-        st.session_state.allocations[st.session_state.trial] = {
-            'initial': st.session_state.allocations.get(st.session_state.trial, {}).get('initial'),
-            'ai': (ai_a, ai_b),
+        # Save allocation and create trial record
+        save_allocation(session_id, current_trial, 'initial', initial_a, initial_b)
+        
+        # Update session state
+        st.session_state.trial_step = 2
+        st.session_state.allocations[current_trial] = {
+            'initial': (initial_a, initial_b),
+            'ai': None,
             'final': None
         }
+        update_session_progress(session_id)
+        st.rerun()
 
-    # Display user and AI allocations
-    initial_a, initial_b = st.session_state.allocations[st.session_state.trial]['initial']
-    ai_a, ai_b = st.session_state.allocations[st.session_state.trial]['ai']
+def show_ai_recommendation():
+    session_id = st.query_params['session_id']
+    current_trial = st.session_state.trial
+    scenario_id = st.session_state.scenario_id
+    
+    st.title(f"Trial {current_trial} - Step 2: AI Recommendation")
+    
+    # Get pre-loaded AI recommendation
+    try:
+        ai_data = st.session_state.ai_recommendations_data[current_trial]
+    except KeyError:
+        st.error("Missing AI recommendation data!")
+        st.stop()
+
+    # Check for instructed trial
+    is_instructed = (
+        (st.session_state.max_trials == 5 and current_trial == 3) or
+        (st.session_state.max_trials == 100 and current_trial == 79)
+    )
+
+    # Save AI recommendation if not exists
+    if not st.session_state.allocations[current_trial]['ai']:
+        ai_a, ai_b = (55, 45) if is_instructed else ai_data
+        save_allocation(session_id, current_trial, 'ai', ai_a, ai_b)
+        st.session_state.allocations[current_trial]['ai'] = (ai_a, ai_b)
+
+    # Display allocations
+    initial_a, initial_b = st.session_state.allocations[current_trial]['initial']
+    ai_a, ai_b = st.session_state.allocations[current_trial]['ai']
 
     col1, col2 = st.columns(2)
     with col1:
         with st.container(border=True):
-            st.subheader("Your Initial Allocation")
+            st.subheader("Your Allocation")
             st.metric("Fund A:", f"{initial_a}%")
             st.metric("Fund B:", f"{initial_b}%")
         
     with col2:
         with st.container(border=True):
-            st.subheader("AI Recommendation ✨")
-
-            if is_instructed_trial:
-                st.markdown("""
-                    **Special Instruction** For this trial only:  
-                    You **MUST** allocate **exactly 55% to Fund A** and 45% to **Fund B**  
-                    This is a test of following instructions and does not affect your performance.
-                    The real AI recommendation will be shown after you submit this trial.
-                """)
+            st.subheader("AI Recommendation")
+            if is_instructed:
+                st.markdown("**Special Instruction:** Allocate exactly 55% Fund A")
             st.metric("Fund A:", f"{ai_a}%")
             st.metric("Fund B:", f"{ai_b}%")
-            
+
+    # Final allocation input
     st.markdown("---")
-    st.markdown("Based on your initial allocation and the AI recommendation, how do you allocate your assets?")
-    col3, col4 = st.columns(2)
-    with col3:
-        adjusted_a = st.number_input("Allocation to Fund A (%)", min_value=0, max_value=100, value= None, key="adjusted_a")
-
-    with col4:
-        adjusted_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - adjusted_a) if adjusted_a is not None else 0, key="adjusted_b", disabled=True)
-        # st.write(f"Automatic allocation: {adjusted_b}%")
-
-    if st.button("Submit Allocation"):
+    adjusted_a = st.number_input("Final Allocation to Fund A (%)", 
+                               min_value=0, max_value=100, 
+                               value=None, key=f"final_a_{current_trial}")
+    adjusted_b = 100 - adjusted_a if adjusted_a is not None else 0
+    
+    if st.button("Submit Final Allocation", key=f"final_btn_{current_trial}"):
         if adjusted_a is None:
             st.error("Allocation to Fund A is required.")
-        else:
-            # Save final
-            save_allocation(
-                st.query_params['session_id'],
-                st.session_state.trial,
-                'final',
-                adjusted_a,
-                adjusted_b
-            )
+            return
 
-            # If it's an instructed response trial, check compliance
-            if is_instructed_trial:
-                instructed_response_passed = (adjusted_a == 55 and adjusted_b == 45)
-                supabase.table('sessions').update({
-                    'instructed_response_2_passed': instructed_response_passed
-                }).eq('session_id', st.query_params['session_id']).execute()
+        # Save final allocation
+        save_allocation(session_id, current_trial, 'final', adjusted_a, adjusted_b)
+        st.session_state.allocations[current_trial]['final'] = (adjusted_a, adjusted_b)
 
-            # Store the returns in 'trials'
-            return_a, return_b = st.session_state.fund_returns_data[current_trial_index]
-            trial_response = supabase.table('trials') \
-                .select('trial_id') \
-                .eq('session_id', st.query_params['session_id']) \
-                .eq('trial_number', st.session_state.trial) \
-                .execute()
-            trial_id = trial_response.data[0]['trial_id']
+        # Handle instructed trial
+        if is_instructed:
+            supabase.table('sessions').update({
+                'instructed_response_2_passed': adjusted_a == 55
+            }).eq('session_id', session_id).execute()
 
-            supabase.table('trials').update({
-                'return_a': float(return_a),
-                'return_b': float(return_b)
-            }).eq('trial_id', trial_id).execute()
-
-            st.session_state.trial_step = 3
-            update_session_progress(st.query_params['session_id'])
-            st.rerun()
+        # Move to next step
+        st.session_state.trial_step = 3
+        update_session_progress(session_id)
+        st.rerun()
 
 def show_performance():
-    st.title(f"Trial {st.session_state.trial} - Step 3: Performance")
+    session_id = st.query_params['session_id']
+    current_trial = st.session_state.trial
+    scenario_id = st.session_state.scenario_id
+    
+    # Get returns from pre-loaded fund_returns data
+    return_a, return_b = st.session_state.fund_returns_data[current_trial]
+    
+    # Get allocations
+    alloc = st.session_state.allocations[current_trial]
+    final_a, final_b = alloc['final']
+    ai_a, ai_b = alloc['ai']
 
-    trial_data = st.session_state.allocations[st.session_state.trial]
-    return_a, return_b = st.session_state.fund_returns[st.session_state.trial]
-
-    final_a, final_b = trial_data['final']
+    # Calculate returns
     final_return = (final_a/100)*return_a + (final_b/100)*return_b
-
-    ai_a, ai_b = trial_data['ai']
     ai_return = (ai_a/100)*return_a + (ai_b/100)*return_b
 
+    # Create performance data
     df = pd.DataFrame({
-        'Category': ['Fund A', 'Fund B', 'AI Portfolio', 'User Portfolio'],
-        'Performance': [
-            return_a * 100,
-            return_b * 100,
-            ai_return * 100,
-            final_return * 100
-        ]
+        'Category': ['Fund A', 'Fund B', 'AI Portfolio', 'Your Portfolio'],
+        'Performance': [return_a*100, return_b*100, ai_return*100, final_return*100]
     })
 
-    scenario = st.session_state.get('scenario_id')
-    # Insert the scenario_id for the scenario "long" from the database
-    if scenario == '2e1e164a-699c-4c00-acff-61a98e23ddec' or 'b8426ff5-c6f2-4f25-a259-764e993ffa29':
-        duration = "last financial period"
-    else:
-        duration = "last 20 financial periods"
-
+    # Display section
+    st.title(f"Trial {current_trial} - Step 3: Performance")
     st.markdown(f"""
-    Allocation breakdown:
-    - Your Portfolio: **Fund A**: {final_a}%, **Fund B**: {final_b}%
-    - AI portfolio: **Fund A**: {ai_a}%, **Fund B**: {ai_b}%""")
-
-    st.markdown(f"Overview how Fund A, Fund B, the AI portfolio and your portfolio performed in the **{duration}**:")
+    **Allocation Breakdown**
+    - Your Portfolio: {final_a}% A, {final_b}% B
+    - AI Recommendation: {ai_a}% A, {ai_b}% B
+    """)
     
+    st.plotly_chart(cached_performance_chart(df), use_container_width=True)
 
-    fig = create_performance_bar_chart(df, margin=dict(t=20, b=20))
-    st.plotly_chart(fig, use_container_width=True)
-
-    btn_label = (
-        "Continue to Next Trial" if st.session_state.trial < st.session_state.max_trials - 1
-        else "Proceed to Final Allocation"
-    )
-    if st.button(btn_label):
-        st.session_state.trial += 1
-        st.session_state.trial_step = 1
-        update_session_progress(st.query_params['session_id'])
+    # Next trial button
+    btn_label = "Continue" if current_trial < st.session_state.max_trials else "Finish"
+    if st.button(btn_label, key=f"continue_{current_trial}"):
+        if current_trial < st.session_state.max_trials:
+            st.session_state.trial += 1
+            st.session_state.trial_step = 1
+        else:
+            st.session_state.page = 'final'
+        update_session_progress(session_id)
         st.rerun()
