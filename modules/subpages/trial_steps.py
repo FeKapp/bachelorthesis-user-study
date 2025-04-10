@@ -30,9 +30,10 @@ def show_initial_allocation():
     scenario_id = st.session_state.scenario_id
     
     # Get period information from scenario_config
-    periods = "financial period" if st.session_state.max_trials == 100 else "20 financial periods"
+    periods = "3 months" if st.session_state.max_trials == 100 else "5 years"
     
-    st.title(f"Trial {current_trial} - Step 1: Initial Allocation")
+    # st.title(f"Trial {current_trial} - Step 1: Initial Allocation")
+    st.title(f"Step 1: Initial Allocation")
     st.markdown(f"Please allocate your assets for the **next {periods}**.")
 
     col1, col2 = st.columns(2)
@@ -74,8 +75,9 @@ def show_ai_recommendation():
     current_trial = st.session_state.trial
     scenario_id = st.session_state.scenario_id
     
-    st.title(f"Trial {current_trial} - Step 2: AI Recommendation")
-    
+    # st.title(f"Trial {current_trial} - Step 2: AI Recommendation")
+    st.title(f"Step 2: AI Recommendation")
+
     # Get pre-loaded AI recommendation
     try:
         ai_data = st.session_state.ai_recommendations_data[current_trial]
@@ -108,20 +110,35 @@ def show_ai_recommendation():
         
     with col2:
         with st.container(border=True):
-            st.subheader("AI Recommendation")
+            st.subheader("AI Recommendation ✨")
             if is_instructed:
-                st.markdown("**Special Instruction:** Allocate exactly 55% Fund A")
+                st.markdown("""
+                    **Special Instruction** For this trial only:  
+                    You **MUST** allocate **exactly 55% to Fund A** and 45% to **Fund B**  
+                    This is a test of following instructions and does not affect your performance.
+                    The real AI recommendation will be shown after you submit this trial.
+                """)
             st.metric("Fund A:", f"{ai_a}%")
             st.metric("Fund B:", f"{ai_b}%")
 
     # Final allocation input
     st.markdown("---")
-    adjusted_a = st.number_input("Final Allocation to Fund A (%)", 
+    st.markdown("Based on your initial allocation and the AI recommendation, how do you allocate your assets?")
+    
+    col3, col4 = st.columns(2)
+    with col3:
+        adjusted_a = st.number_input("Final Allocation to Fund A (%)", 
                                min_value=0, max_value=100, 
                                value=None, key=f"final_a_{current_trial}")
-    adjusted_b = 100 - adjusted_a if adjusted_a is not None else 0
+
+    with col4:
+        adjusted_b = 100 - adjusted_a if adjusted_a is not None else 0
+        st.number_input("Automatic allocation to Fund B (%)", 
+                      min_value=0, max_value=100, 
+                      value=adjusted_b, key=f"initial_b_{current_trial}", disabled=True)
+
     
-    if st.button("Submit Final Allocation", key=f"final_btn_{current_trial}"):
+    if st.button("Submit Allocation", key=f"final_btn_{current_trial}"):
         if adjusted_a is None:
             st.error("Allocation to Fund A is required.")
             return
@@ -165,17 +182,23 @@ def show_performance():
     })
 
     # Display section
-    st.title(f"Trial {current_trial} - Step 3: Performance")
+    # st.title(f"Trial {current_trial} - Step 3: Performance")
+    st.title(f"Step 3: Performance")
+
+    duration = "last 3 months" if st.session_state.max_trials == 100 else "last 5 years"
+
     st.markdown(f"""
-    **Allocation Breakdown**
-    - Your Portfolio: {final_a}% A, {final_b}% B
-    - AI Recommendation: {ai_a}% A, {ai_b}% B
+    Allocation breakdown:
+    - Your Portfolio: **Fund A**: {final_a}%, **Fund B**: {final_b}%
+    - AI portfolio: **Fund A**: {ai_a}%, **Fund B**: {ai_b}%
+    
+    Overview how Fund A, Fund B, the AI portfolio and your portfolio performed in the **{duration}**:
     """)
     
     st.plotly_chart(cached_performance_chart(df), use_container_width=True)
 
     # Next trial button
-    btn_label = "Continue" if current_trial < st.session_state.max_trials else "Finish"
+    btn_label = "Continue to next trial" if current_trial < st.session_state.max_trials else "Finish"
     if st.button(btn_label, key=f"continue_{current_trial}"):
         if current_trial < st.session_state.max_trials:
             st.session_state.trial += 1
