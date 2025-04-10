@@ -172,7 +172,7 @@ def show_instructed():
         
     with col2:
         with st.container(border=True):
-            st.subheader("AI Recommendation ✨")
+            st.subheader("AI Recommendation✨")
             st.markdown("""
                 **Special Instruction** For this trial only:  
                 You **MUST** allocate **exactly 55% to Fund A** and 45% to **Fund B**  

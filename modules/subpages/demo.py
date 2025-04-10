@@ -126,7 +126,7 @@ def show_demo_ai():
         
     with col2:
         with st.container(border=True):
-            st.subheader("AI Recommendation ✨")
+            st.subheader("AI Recommendation✨")
             st.metric("Fund A:", f"{ai_a}%")
             st.metric("Fund B:", f"{ai_b}%")
             
@@ -186,12 +186,11 @@ def show_demo_performance():
         ]
     })
 
-    scenario = st.session_state.get('scenario_id')
-    # Insert the scenario_id for the scenario "long" from the database
-    if scenario == '2e1e164a-699c-4c00-acff-61a98e23ddec' or 'b8426ff5-c6f2-4f25-a259-764e993ffa29':
-        duration = "last financial period"
+
+    if st.session_state.max_trials == 100:
+        duration = "last 3 months"
     else:
-        duration = "last 20 financial periods"
+        duration = "last 5 years"
 
     st.markdown(f"""
     Allocation breakdown:
