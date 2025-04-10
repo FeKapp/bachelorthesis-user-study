@@ -20,7 +20,9 @@ def handle_trial_steps():
     step_handlers = {
         1: show_initial_allocation,
         2: show_ai_recommendation,
-        3: show_performance
+        3: show_performance,
+        4: show_instructed
+
     }
     step_handlers.get(st.session_state.trial_step, show_initial_allocation)()
 
@@ -61,7 +63,16 @@ def show_initial_allocation():
         save_allocation(session_id, current_trial, 'initial', initial_a, initial_b)
         
         # Update session state
-        st.session_state.trial_step = 2
+        # Check for instructed trial
+        is_instructed = (
+            (st.session_state.max_trials == 5 and current_trial == 3) or
+            (st.session_state.max_trials == 100 and current_trial == 79)
+        )
+        if is_instructed:
+            st.session_state.trial_step = 4
+        else:
+            st.session_state.trial_step = 2
+            
         st.session_state.allocations[current_trial] = {
             'initial': (initial_a, initial_b),
             'ai': None,
@@ -85,15 +96,9 @@ def show_ai_recommendation():
         st.error("Missing AI recommendation data!")
         st.stop()
 
-    # Check for instructed trial
-    is_instructed = (
-        (st.session_state.max_trials == 5 and current_trial == 3) or
-        (st.session_state.max_trials == 100 and current_trial == 79)
-    )
-
     # Save AI recommendation if not exists
     if not st.session_state.allocations[current_trial]['ai']:
-        ai_a, ai_b = (55, 45) if is_instructed else ai_data
+        ai_a, ai_b = ai_data
         save_allocation(session_id, current_trial, 'ai', ai_a, ai_b)
         st.session_state.allocations[current_trial]['ai'] = (ai_a, ai_b)
 
@@ -111,13 +116,6 @@ def show_ai_recommendation():
     with col2:
         with st.container(border=True):
             st.subheader("AI Recommendation ✨")
-            if is_instructed:
-                st.markdown("""
-                    **Special Instruction** For this trial only:  
-                    You **MUST** allocate **exactly 55% to Fund A** and 45% to **Fund B**  
-                    This is a test of following instructions and does not affect your performance.
-                    The real AI recommendation will be shown after you submit this trial.
-                """)
             st.metric("Fund A:", f"{ai_a}%")
             st.metric("Fund B:", f"{ai_b}%")
 
@@ -147,16 +145,74 @@ def show_ai_recommendation():
         save_allocation(session_id, current_trial, 'final', adjusted_a, adjusted_b)
         st.session_state.allocations[current_trial]['final'] = (adjusted_a, adjusted_b)
 
-        # Handle instructed trial
-        if is_instructed:
-            supabase.table('sessions').update({
-                'instructed_response_2_passed': adjusted_a == 55
-            }).eq('session_id', session_id).execute()
-
         # Move to next step
         st.session_state.trial_step = 3
         update_session_progress(session_id)
         st.rerun()
+
+def show_instructed():
+
+    session_id = st.query_params['session_id']
+    current_trial = st.session_state.trial
+    scenario_id = st.session_state.scenario_id
+    
+    # st.title(f"Trial {current_trial} - Step 2: AI Recommendation")
+    st.title(f"Step 2: AI Recommendation")
+
+    # Display allocations
+    initial_a, initial_b = st.session_state.allocations[current_trial]['initial']
+    ai_a, ai_b = (55, 45)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        with st.container(border=True):
+            st.subheader("Your Allocation")
+            st.metric("Fund A:", f"{initial_a}%")
+            st.metric("Fund B:", f"{initial_b}%")
+        
+    with col2:
+        with st.container(border=True):
+            st.subheader("AI Recommendation ✨")
+            st.markdown("""
+                **Special Instruction** For this trial only:  
+                You **MUST** allocate **exactly 55% to Fund A** and 45% to **Fund B**  
+                This is a test of following instructions and does not affect your performance.
+                The real AI recommendation will be shown after you submit this trial.
+            """)
+            st.metric("Fund A:", f"{ai_a}%")
+            st.metric("Fund B:", f"{ai_b}%")
+
+    # Final allocation input
+    st.markdown("---")
+    st.markdown("Based on your initial allocation and the AI recommendation, how do you allocate your assets?")
+    
+    col3, col4 = st.columns(2)
+    with col3:
+        instructed_a = st.number_input("Final Allocation to Fund A (%)", 
+                               min_value=0, max_value=100, 
+                               value=None, key=f"final_a_{current_trial}")
+
+    with col4:
+        instructed_b = 100 - instructed_a if instructed_a is not None else 0
+        st.number_input("Automatic allocation to Fund B (%)", 
+                      min_value=0, max_value=100, 
+                      value=instructed_b, key=f"initial_b_{current_trial}", disabled=True)
+
+    
+    # Submit allocation
+    if st.button("Submit Allocation", key=f"final_btn_{current_trial}"):
+        if instructed_a is None:
+            st.error("Allocation to Fund A is required.")
+            return
+
+        supabase.table('sessions').update({
+            'instructed_response_2_passed': instructed_a == 55
+        }).eq('session_id', session_id).execute()
+
+        # Move to next step
+        st.session_state.trial_step = 2
+        st.rerun()
+
 
 def show_performance():
     session_id = st.query_params['session_id']

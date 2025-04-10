@@ -8,7 +8,7 @@ from modules.components.charts import create_performance_bar_chart
 def show_final():
     st.title("Final Allocation")
 
-    st.markdown(":red[*This is your final allocation: Please allocate your assets to Fund A (0-100%) and Fund B (0-100%) for the **next 400 financial periods**.]")
+    st.markdown(":red[This is your final allocation: Please allocate your assets to Fund A (0-100%) and Fund B (0-100%) for the **next 50 years**.]")
     
     col1, col2 = st.columns(2)
     with col1:
