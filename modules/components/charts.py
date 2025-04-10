@@ -52,10 +52,12 @@ def create_performance_bar_chart(df, margin=None, fixed_y_range=None):
     # Note: Set this default based on the range relevant for your data.
     scenario = st.session_state.get('scenario_id')
     # Insert the scenario_id for the scenario "long" from the database
-    if scenario == '2e1e164a-699c-4c00-acff-61a98e23ddec' or 'b8426ff5-c6f2-4f25-a259-764e993ffa29':
-        fixed_y_range = [-35, 35] # 
+    
+    #set the fixed range based on returns analysis
+    if st.session_state.max_trials == 100:
+        fixed_y_range = [-35, 35]
     else:
-        fixed_y_range = [-150, 150] # 
+        fixed_y_range = [-150, 150]
 
     # Update layout to use the fixed y-axis range
     fig.update_layout(
