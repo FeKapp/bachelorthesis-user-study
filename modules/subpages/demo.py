@@ -48,9 +48,9 @@ def show_demo_initial():
     scenario = st.session_state.get('scenario_id')
     # Insert the scenario_id for the scenario "long" from the database
     if scenario == '2e1e164a-699c-4c00-acff-61a98e23ddec' or 'b8426ff5-c6f2-4f25-a259-764e993ffa29':
-        st.markdown("Please allocate your assets to Fund A (0-100%) and Fund B (0-100%) for the **next financial period**.")
+        st.markdown("Please allocate your assets to Fund A (0-100%) and Fund B (0-100%) for the **next 3 months**.")
     else:
-        st.markdown("Please allocate your assets to Fund A (0-100%) and Fund B (0-100%) for the **next 20 financial periods**.")
+        st.markdown("Please allocate your assets to Fund A (0-100%) and Fund B (0-100%) for the **next 5 years**.")
 
     # Demo description initial allocation step
     st.markdown("""
