@@ -47,7 +47,8 @@ def create_performance_bar_chart(df, margin=None, fixed_y_range=None):
             text=[f"{val:.2f}%" for val in df['Performance']],
             textposition='outside',
             textfont=dict(
-                color='black'  # Setzt die Prozentangaben auf schwarz
+                color='black',
+                size=14   # Setzt die Prozentangaben auf schwarz
             )    
         ),
     ])
@@ -62,14 +63,14 @@ def create_performance_bar_chart(df, margin=None, fixed_y_range=None):
     xaxis=dict(
         tickfont=dict(
             color='black',
-            size= 18,  # Set the font size
+            size= 18  # Set the font size
         )
     ),
     # black axis title
     yaxis_title= 'Performance (%)' ,
     yaxis_title_font=dict(
         color='black',
-        size= 14,  # Set the font size
+        size= 14  # Set the font size
     ),
     yaxis=dict(range=fixed_y_range),
     showlegend=False,
