@@ -62,7 +62,7 @@ def show_demo_initial():
 
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown("## Fund A")
+        st.markdown("## Fund A 🔵")
         st.image(os.path.join("assets", "images", "fund_A.png"), width=200)
         initial_a = st.number_input(
             "Allocation to Fund A (%)",
@@ -72,7 +72,7 @@ def show_demo_initial():
             key="demo_initial_a"
         )
     with col2:
-        st.markdown("## Fund B")
+        st.markdown("## Fund B 🟡")
         st.image(os.path.join("assets", "images", "fund_B.png"), width=200)
         initial_b = st.number_input(
             "Automatic allocation to Fund B (%)",
@@ -123,13 +123,13 @@ def show_demo_ai():
     col1, col2 = st.columns(2)
     with col1:
         with st.container(border=True):
-            st.subheader("Your Initial Allocation")
+            st.subheader("Your Initial Allocation 👤")
             st.metric("Fund A:", f"{initial_a}%")
             st.metric("Fund B:", f"{initial_b}%")
         
     with col2:
         with st.container(border=True):
-            st.subheader("AI Recommendation✨")
+            st.subheader("AI Recommendation ✨")
             st.metric("Fund A:", f"{ai_a}%")
             st.metric("Fund B:", f"{ai_b}%")
             
@@ -181,7 +181,7 @@ def show_demo_performance():
     user_return = (final_a/100) * return_a +  (final_b/100) * return_b  
 
     df = pd.DataFrame({
-        'Category': ['Your Portfolio 👤', 'AI Portfolio ✨', 'Fund A 🅰️', 'Fund B 🅱️'],
+        'Category': ['Your Portfolio 👤', 'AI Portfolio ✨', 'Fund A 🔵', 'Fund B 🟡'],
         'Performance': [user_return*100, ai_return*100, return_a*100, return_b*100 ]
     })
 
