@@ -17,17 +17,19 @@ def show_consent():
         # Load and display consent text
         consent_file_path = os.path.join("assets", "text", "consent.txt")
         consent_text = load_text(consent_file_path)
-        st.markdown(consent_text)   
-
-        # Display the clickable text that expands to show more information
-        with st.expander("Obtain more information about the processing of your personal data"):
-            data_processing_file_path = os.path.join("assets", "text", "data_processing.txt")
-            data_processing_text = load_text(data_processing_file_path)
-            st.markdown(data_processing_text)
+        
 
 
         # Consent form
         with st.form(key="consent_form"):
+            st.markdown(consent_text)   
+
+            # Display the clickable text that expands to show more information
+            with st.expander("Obtain more information about the processing of your personal data"):
+                data_processing_file_path = os.path.join("assets", "text", "data_processing.txt")
+                data_processing_text = load_text(data_processing_file_path)
+                st.markdown(data_processing_text)
+
             consent_given = st.checkbox(
                 "I agree to the consent form and to the processing of my personal data in accordance with the information provided herein."
             )
