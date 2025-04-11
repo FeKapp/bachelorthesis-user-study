@@ -232,9 +232,13 @@ def show_performance():
     ai_return = (ai_a/100)*return_a + (ai_b/100)*return_b
 
     # Create performance data
+    # df = pd.DataFrame({
+    #     'Category': ['Fund A 🅰️', 'Fund B 🅱️', 'AI Portfolio ✨', 'Your Portfolio 👤'],
+    #     'Performance': [return_a*100, return_b*100, ai_return*100, final_return*100]
+    # })
     df = pd.DataFrame({
-        'Category': ['Fund A', 'Fund B', 'AI Portfolio', 'Your Portfolio'],
-        'Performance': [return_a*100, return_b*100, ai_return*100, final_return*100]
+        'Category': ['Your Portfolio 👤', 'AI Portfolio ✨', 'Fund A 🅰️', 'Fund B 🅱️'],
+        'Performance': [final_return*100, ai_return*100, return_a*100, return_b*100 ]
     })
 
     # Display section
@@ -248,7 +252,7 @@ def show_performance():
     - Your Portfolio: **Fund A**: {final_a}%, **Fund B**: {final_b}%
     - AI portfolio: **Fund A**: {ai_a}%, **Fund B**: {ai_b}%
     
-    Overview how Fund A, Fund B, the AI portfolio and your portfolio performed in the **{duration}**:
+    Overview how your portfolio, the AI portfolio, Fund A and Fund B performed in the **{duration}**:
     """)
     
     st.plotly_chart(cached_performance_chart(df), use_container_width=True)
