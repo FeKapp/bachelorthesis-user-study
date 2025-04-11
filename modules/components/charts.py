@@ -49,22 +49,31 @@ def create_performance_bar_chart(df, margin=None, fixed_y_range=None):
         ),
     ])
     
-    # Note: Set this default based on the range relevant for your data.
-    scenario = st.session_state.get('scenario_id')
-    # Insert the scenario_id for the scenario "long" from the database
-    
-    #set the fixed range based on returns analysis
+    #set the fixed range based on returns analysis for scenarios
     if st.session_state.max_trials == 100:
         fixed_y_range = [-35, 35]
     else:
         fixed_y_range = [-150, 150]
 
     # Update layout to use the fixed y-axis range
+    # fig.update_layout(
+    #     yaxis_title='Performance (%)',
+    #     yaxis=dict(range=fixed_y_range),
+    #     showlegend=False,
+    #     margin=margin if margin else dict(t=20, b=20)
+    # )
+
     fig.update_layout(
-        yaxis_title='Performance (%)',
-        yaxis=dict(range=fixed_y_range),
-        showlegend=False,
-        margin=margin if margin else dict(t=20, b=20)
+    xaxis=dict(
+        tickfont=dict(
+            color='black'  # Use a bold font variant
+        )
+    ),
+    yaxis_title='Performance (%)',
+    yaxis=dict(range=fixed_y_range),
+    showlegend=False,
+    margin=margin if margin else dict(t=20, b=20)
     )
+
     return fig
 
