@@ -40,14 +40,14 @@ def show_initial_allocation():
 
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown("## Fund A")
+        st.markdown("## Fund A 🔵")
         st.image(os.path.join("assets", "images", "fund_A.png"), width=200)
         initial_a = st.number_input("Allocation to Fund A (%)", 
                                   min_value=0, max_value=100, 
                                   value=None, key=f"initial_a_{current_trial}")
         
     with col2:
-        st.markdown("## Fund B")
+        st.markdown("## Fund B 🟡")
         st.image(os.path.join("assets", "images", "fund_B.png"), width=200)
         initial_b = 100 - initial_a if initial_a is not None else 0
         st.number_input("Automatic allocation to Fund B (%)", 
@@ -109,7 +109,7 @@ def show_ai_recommendation():
     col1, col2 = st.columns(2)
     with col1:
         with st.container(border=True):
-            st.subheader("Your Allocation")
+            st.subheader("Your Initial Allocation 👤")
             st.metric("Fund A:", f"{initial_a}%")
             st.metric("Fund B:", f"{initial_b}%")
         
@@ -166,13 +166,13 @@ def show_instructed():
     col1, col2 = st.columns(2)
     with col1:
         with st.container(border=True):
-            st.subheader("Your Allocation")
+            st.subheader("Your Initial Allocation 👤")
             st.metric("Fund A:", f"{initial_a}%")
             st.metric("Fund B:", f"{initial_b}%")
         
     with col2:
         with st.container(border=True):
-            st.subheader("AI Recommendation✨")
+            st.subheader("AI Recommendation ✨")
             st.markdown("""
                 **Special Instruction** For this trial only:  
                 You **MUST** allocate **exactly 55% to Fund A** and 45% to **Fund B**  
@@ -231,13 +231,8 @@ def show_performance():
     final_return = (final_a/100)*return_a + (final_b/100)*return_b
     ai_return = (ai_a/100)*return_a + (ai_b/100)*return_b
 
-    # Create performance data
-    # df = pd.DataFrame({
-    #     'Category': ['Fund A 🅰️', 'Fund B 🅱️', 'AI Portfolio ✨', 'Your Portfolio 👤'],
-    #     'Performance': [return_a*100, return_b*100, ai_return*100, final_return*100]
-    # })
     df = pd.DataFrame({
-        'Category': ['Your Portfolio 👤', 'AI Portfolio ✨', 'Fund A 🅰️', 'Fund B 🅱️'],
+        'Category': ['Your Portfolio 👤', 'AI Portfolio ✨', 'Fund A 🔵', 'Fund B 🟡'],
         'Performance': [final_return*100, ai_return*100, return_a*100, return_b*100 ]
     })
 
