@@ -162,7 +162,7 @@ def show_demo_performance():
         st.markdown("""
         :red[This is a demo step: You now see the **performance overview** of your allocation:]
         - :red[In the allocation breakdown, you can see your and the AI's allocation to Fund A and Fund B.]
-        - :red[In the bar chart, you can see the performance for the given investment period of Fund A, Fund B, the AI suggested portfolio, and your portfolio.]
+        - :red[In the bar chart, you can see the performance for the given investment period of your portfolio, the AI suggested portfolio, Fund A and Fund B.]
         - :red[The bar in the chart will be green if the performance is positive and red if it is negative.]
         - :red[Note: The returns of Fund A and Fund B **here in the demo** are randomly generated for illustration purpose. The real values will be shown as soon as the experiment starts.]
         - :red[To terminate the demo and start with the experiment, click on **Start Experiment**.]
