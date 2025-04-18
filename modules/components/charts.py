@@ -57,7 +57,7 @@ def create_performance_bar_chart(df, margin=None, fixed_y_range=None):
     if st.session_state.max_trials == 100:
         fixed_y_range = [-35, 35]
     else:
-        fixed_y_range = [-150, 150]
+        fixed_y_range = [-120, 120]
 
     fig.update_layout(
     xaxis=dict(
