@@ -95,7 +95,7 @@ def show_debrief():
                     'ai_proficiency': ai_proficiency,
                     'financial_literacy': financial_literacy
                 })
-
+                
                 # Mark session as complete
                 supabase.table('sessions').update({
                     'completed_at': datetime.now(timezone.utc).isoformat(),

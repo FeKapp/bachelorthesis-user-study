@@ -57,7 +57,6 @@ def save_demographics(session_id: str, data: dict):
         'session_id': session_id,
         **data,
         'created_at': datetime.now(timezone.utc).isoformat()
-
     }).execute()
 
 def load_session_data(session_id: str):
