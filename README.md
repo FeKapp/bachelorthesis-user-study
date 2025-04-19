@@ -1,2 +1,2 @@
 # bachelorthesis-user-study
-A website with the study for my bachelor thesis, with which I can measure the myopic loss aversion and the influence of suggestions by a biased AI.
+A website with the user study for my bachelor thesis. Human behaviour with AI-based financial investment recommendations.

@@ -30,7 +30,6 @@ def handle_trial_steps():
 def show_initial_allocation():
     session_id     = st.query_params['session_id']
     ordinal        = st.session_state.trial
-    # ───────────── NEW: map ordinal → actual trial number ─────────────
     actual_trial   = st.session_state.trial_sequence[ordinal - 1]
 
     # Get period information from scenario_config
@@ -59,7 +58,6 @@ def show_initial_allocation():
             st.error("Allocation to Fund A (0% - 100%) is required.")
             return
 
-        # ───────────── MODIFIED: use actual_trial for DB ─────────────
         save_allocation(session_id, actual_trial, 'initial', initial_a, initial_b)
         
         is_instructed = (
@@ -75,7 +73,6 @@ def show_initial_allocation():
         update_session_progress(session_id)
         st.rerun()
 
-
 def show_ai_recommendation():
     session_id   = st.query_params['session_id']
     ordinal      = st.session_state.trial
@@ -83,7 +80,6 @@ def show_ai_recommendation():
 
     st.title(f"Step 2: AI Recommendation")
 
-    # ───────────── MODIFIED: lookup by actual_trial ─────────────
     try:
         ai_a, ai_b = st.session_state.ai_recommendations_data[actual_trial]
     except KeyError:
@@ -133,7 +129,6 @@ def show_ai_recommendation():
         st.session_state.trial_step = 3
         update_session_progress(session_id)
         st.rerun()
-
 
 def show_instructed():
 
@@ -198,13 +193,11 @@ def show_instructed():
         st.session_state.trial_step = 2
         st.rerun()
 
-
 def show_performance():
     session_id   = st.query_params['session_id']
     ordinal      = st.session_state.trial
     actual_trial = st.session_state.trial_sequence[ordinal - 1]
 
-    # ───────────── MODIFIED: lookup returns by actual_trial ─────────────
     return_a, return_b = st.session_state.fund_returns_data[actual_trial]
     final_a, final_b   = st.session_state.allocations[ordinal]['final']
     ai_a, ai_b         = st.session_state.allocations[ordinal]['ai']

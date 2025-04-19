@@ -1,10 +1,10 @@
 import streamlit as st
 import pycountry
-import pandas as pd
 from datetime import datetime, timezone
 from modules.database import supabase, save_demographics
 
 def show_debrief():
+
     st.title("Study Complete")
     st.write("**Thank you for participating!**")
 
@@ -34,8 +34,6 @@ def show_debrief():
         st.markdown("---")
         st.subheader("Demographic information")
         country = st.selectbox("Country of Residence", options=["Select a country"] + country_list)
-
-        # place_of_birth = st.text_input("Place of Birth (optional)", value="", key="birth_place")
 
         gender = st.selectbox(
             "Gender",
@@ -97,12 +95,6 @@ def show_debrief():
                     'ai_proficiency': ai_proficiency,
                     'financial_literacy': financial_literacy
                 })
-
-                # Update "instructed response" (place_of_birth is optional)
-                # instructed_response = (place_of_birth.strip() == "")
-                # supabase.table('sessions').update({
-                #     'instructed_response_1_passed': instructed_response
-                # }).eq('session_id', st.query_params['session_id']).execute()
 
                 # Mark session as complete
                 supabase.table('sessions').update({
