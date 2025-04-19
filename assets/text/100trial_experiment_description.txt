@@ -1,4 +1,4 @@
-In this experiment, you will be asked to make several financial investment decisions. Imagine that you have recently inherited some money, and your goal is to invest that money to earn the best possible return. Every 3 months, you will decide how much of your money to allocate between two investment options, called **Fund A** and **Fund B**. The performance of the two funds is not yet known, but you will be able to observe it during the experiment.
+In this experiment, you will be asked to make several financial investment decisions. Imagine you have been saving steadily and now you have a substantial amount of your own money that you would like to invest in order to achieve the best possible return. Every 3 months, you will decide how much of your money to allocate between two investment options, called **Fund A** and **Fund B**. The performance of the two funds is not yet known, but you will be able to observe it during the experiment.
 
 Each investment decision for a financial period (3 months) has **3 phases**:
 
@@ -18,7 +18,11 @@ At the end of the experiment, you are asked to make a **final investment decisio
 
 To familiarize yourself with the process, you will first take part in a **guided demo**. Please note that all numbers shown during the demo are randomly generated and do not reflect the actual behavior of the AI or the actual returns of Fund A and Fund B in the study.
 
-Please consider your decisions carefully. **Do not write anything down during this experiment.** If you have any questions pertaining to this experiment, feel free to contact:
+Please consider your decisions carefully. **Do not write anything down during this experiment.** 
+
+Estimated time to complete the survey: 30 min
+
+If you have any questions pertaining to this experiment, feel free to contact:
 
 **Felix Kappeler**: [felix.kappeler@student.unisg.ch](mailto:felix.kappeler@student.unisg.ch)
 
