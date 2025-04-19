@@ -1,8 +1,13 @@
 import streamlit as st
 import numpy as np
 import uuid
-import random                        # ← new import
-from datetime import datetime
+import random      
+import random
+from dateutil.parser import isoparse
+from datetime import datetime, timedelta, timezone
+from collections import defaultdict             
+
+from sqlalchemy import text   # if your supabase client lets you run raw SQL
 from modules.database import supabase, update_session_progress
 
 # Cached database fetches with session-specific isolation
@@ -116,19 +121,30 @@ def _load_existing_session(session_id):
     return True
 
 def _create_new_session(session_id):
+  
     """Batch create new session with pre-loaded data"""
-    scenarios = _fetch_scenario_config()
-    scenario = np.random.choice(scenarios)
 
-    # ── REPLACED: instead of ordering by RANDOM() in SQL, fetch all and sample in Python
-    all_seqs = supabase.table('trial_sequences') \
-        .select('*') \
-        .execute().data
-    seq_rec = random.choice(all_seqs)
+    # — pick seq_rec & scenario in one go —
+    # try:
+    all_seqs     = supabase.table('trial_sequences').select('*').execute().data
+    scenarios    = _fetch_scenario_config()
+    all_sessions = supabase.table('sessions').select('*').execute().data
 
-    # convert the stored string arrays to ints
+    seq_rec, scenario = get_session_config(all_seqs, scenarios, all_sessions, lock_window_hours=1.5)
+    # except ValueError:
+    #     st.error("All sequences are currently locked or completed. Please try again shortly.")
+    #     st.stop()
+
+    # — now build your trial_seq as before —
     fy_trials = [int(x) for x in seq_rec['five_year_trials']]
     tm_trials = [int(x) for x in seq_rec['three_month_trials']]
+    trial_seq = fy_trials if scenario['num_trials'] == 5 else tm_trials
+
+
+
+    # # convert the stored string arrays to ints
+    # fy_trials = [int(x) for x in seq_rec['five_year_trials']]
+    # tm_trials = [int(x) for x in seq_rec['three_month_trials']]
 
     # choose based on scenario length
     if scenario.get('num_trials') == 5:
@@ -157,6 +173,64 @@ def _create_new_session(session_id):
         'current_page':       'consent',
         'current_trial':      0,
         'current_trial_step': 1,
-        'created_at':         datetime.now().isoformat(),
+        'created_at':         datetime.now(timezone.utc).isoformat(),
         'max_trials':         len(trial_seq)
     }).execute()
+
+
+def get_session_config(all_seqs, scenarios, all_sessions, lock_window_hours=1.5):
+    """
+    1. Identify all “valid” sessions:
+         • completed_at != None AND data_quality == True, OR
+         • created_at within the last lock_window_hours.
+    2. Group valid sessions by trial_sequence_id.
+    3. For each group:
+         – If it already has 4 sessions, skip.
+         – Otherwise, compute which scenario_ids haven’t appeared, pick one at random,
+           and return that scenario + the group’s trial_sequence.
+    4. If every group has 4 (or there are no sessions at all), return a random
+       (trial_sequence, scenario) pair.
+    """
+   
+    now = datetime.now(timezone.utc)
+    lock_threshold = now - timedelta(hours=lock_window_hours)
+
+    # 1. Filter valid sessions
+    valid = []
+    for sess in all_sessions:
+        print(sess['created_at'])
+        created = isoparse(sess['created_at'])
+        completed = sess['completed_at']
+        dq_good = sess.get('data_quality') is True
+
+        
+
+        if (completed is not None and dq_good) or (created >= lock_threshold):
+            valid.append(sess)
+
+        print("Created:", created, "Loxk Threshold:", lock_threshold)
+
+    # 2. Group by sequence
+    by_seq = defaultdict(list)
+    for sess in valid:
+        by_seq[sess['trial_sequence_id']].append(sess['scenario_id'])
+
+    # prepare set of all scenario_ids
+    all_sids = {s['scenario_id'] for s in scenarios}
+
+    # 3. Look for a group with <4 sessions
+    for seq in all_seqs:
+        seq_id = seq['trial_sequence_id']
+        seen = set(by_seq.get(seq_id, []))
+        if len(seen) < len(all_sids):
+            # missing scenarios
+            missing = list(all_sids - seen)
+            pick_sid = random.choice(missing)
+            # find the matching scenario dict
+            scenario = next(s for s in scenarios if s['scenario_id'] == pick_sid)
+            return seq, scenario
+
+    # 5. if no partial group (or no sessions), just pick entirely at random
+    seq = random.choice(all_seqs)
+    scenario = random.choice(scenarios)
+    return seq, scenario

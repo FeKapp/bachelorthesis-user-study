@@ -1,7 +1,7 @@
 import streamlit as st
 import pycountry
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timezone
 from modules.database import supabase, save_demographics
 
 def show_debrief():
@@ -106,7 +106,7 @@ def show_debrief():
 
                 # Mark session as complete
                 supabase.table('sessions').update({
-                    'completed_at': datetime.now().isoformat(),
+                    'completed_at': datetime.now(timezone.utc).isoformat(),
                     'data_quality': (use_data == "Yes"),
                     'data_quality_comment': comment if use_data == "No" else None
                 }).eq('session_id', st.query_params['session_id']).execute()
