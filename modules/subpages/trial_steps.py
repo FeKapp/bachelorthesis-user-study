@@ -230,4 +230,5 @@ def show_performance():
         else:
             st.session_state.page = 'final'
         update_session_progress(session_id)
+
         st.rerun()

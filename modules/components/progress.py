@@ -17,4 +17,3 @@ def show_progress():
 
     with st.container():
         st.progress(progress, "Study progress:")
-        

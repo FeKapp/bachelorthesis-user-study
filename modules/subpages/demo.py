@@ -161,7 +161,7 @@ def show_demo_performance():
     - AI portfolio: **Fund A**: {ai_a}%, **Fund B**: {ai_b}%""")
 
     st.markdown(f"Overview how your portfolio, the AI portfolio, Fund A and Fund B performed in the **{duration}**:")
-    
+
     fig = create_performance_bar_chart(df, margin=dict(t=20, b=20))
     st.plotly_chart(fig, use_container_width=True)
 
