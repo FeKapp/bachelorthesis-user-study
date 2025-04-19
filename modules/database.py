@@ -1,6 +1,6 @@
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 from supabase import create_client, Client
 import streamlit as st
@@ -37,7 +37,7 @@ def save_allocation(session_id: str, trial_num, allocation_type, fund_a, fund_b,
             'trial_id': trial_id,
             'session_id': session_id,
             'trial_number': trial_num,
-            'created_at': datetime.now().isoformat()
+            'created_at': datetime.now(timezone.utc).isoformat()
         }).execute()
 
     supabase.table('allocations').insert({
@@ -47,7 +47,7 @@ def save_allocation(session_id: str, trial_num, allocation_type, fund_a, fund_b,
         'fund_a': fund_a,
         'fund_b': fund_b,
         'portfolio_return': portfolio_return,
-        'created_at': datetime.now().isoformat()
+        'created_at': datetime.now(timezone.utc).isoformat()
     }).execute()
 
 def save_demographics(session_id: str, data: dict):
@@ -56,7 +56,8 @@ def save_demographics(session_id: str, data: dict):
         'demographic_id': str(uuid.uuid4()),
         'session_id': session_id,
         **data,
-        'created_at': datetime.now().isoformat()
+        'created_at': datetime.now(timezone.utc).isoformat()
+
     }).execute()
 
 def load_session_data(session_id: str):
