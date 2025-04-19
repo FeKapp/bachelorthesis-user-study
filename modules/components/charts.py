@@ -1,30 +1,5 @@
-# import plotly.graph_objects as go
-
-# def create_performance_bar_chart(df, margin=None):
-#     """
-#     Create a bar chart for performance data in the same style as the original code.
-#     df should have columns: 'Category' and 'Performance' (in %).
-#     """
-#     fig = go.Figure(data=[
-#         go.Bar(
-#             x=df['Category'],
-#             y=df['Performance'],
-#             marker_color=['green' if p >= 0 else 'red' for p in df['Performance']],
-#             text=[f"{val:.2f}%" for val in df['Performance']],
-#             textposition='outside'
-#         )
-#     ])
-
-#     fig.update_layout(
-#         yaxis_title='Performance (%)',
-#         showlegend=False,
-#         margin=margin if margin else dict(t=20, b=20)
-#     )
-#     return fig
-
 import plotly.graph_objects as go
 import streamlit as st
-import os
 
 def create_performance_bar_chart(df, margin=None, fixed_y_range=None):
     """
@@ -78,16 +53,15 @@ def create_performance_bar_chart(df, margin=None, fixed_y_range=None):
     shapes=[
             dict(
                 type='line',
-                # 'x' so we place it at an x-value instead of in normalized [0..1] figure space
                 xref='x',
-                yref='paper',     # 'paper' -> spans the entire plot area in the y-direction
-                x0=1.5,           # mid-way between bar at x=1 and bar at x=2
+                yref='paper',     
+                x0=1.5,           
                 x1=1.5,
-                y0=0,             # bottom of the plotting area
-                y1=1,             # top of the plotting area
+                y0=0,             
+                y1=1,             
                 line=dict(
                     color='black',
-                    dash='dot',    # makes it dotted
+                    dash='dot',    
                     width=2
                 )
             )

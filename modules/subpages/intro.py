@@ -2,7 +2,6 @@ import streamlit as st
 import os
 import numpy as np
 from modules.database import supabase
-from modules.database import update_session_progress
 
 def scroll_to_top():
     st.markdown(

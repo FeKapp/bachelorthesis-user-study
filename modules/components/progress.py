@@ -16,7 +16,5 @@ def show_progress():
     """, unsafe_allow_html=True)
 
     with st.container():
-        # st.markdown("<br><br>", unsafe_allow_html=True)
-        # st.caption(f"Study progress: {int(progress * 100)}% complete")
         st.progress(progress, "Study progress:")
         

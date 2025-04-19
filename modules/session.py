@@ -1,13 +1,10 @@
 import streamlit as st
-import numpy as np
 import uuid
 import random      
 import random
 from dateutil.parser import isoparse
 from datetime import datetime, timedelta, timezone
 from collections import defaultdict             
-
-from sqlalchemy import text   # if your supabase client lets you run raw SQL
 from modules.database import supabase, update_session_progress
 
 # Cached database fetches with session-specific isolation
@@ -121,30 +118,17 @@ def _load_existing_session(session_id):
     return True
 
 def _create_new_session(session_id):
-  
-    """Batch create new session with pre-loaded data"""
+    """Create a new session with optimized data fetching"""
 
-    # — pick seq_rec & scenario in one go —
-    # try:
     all_seqs     = supabase.table('trial_sequences').select('*').execute().data
     scenarios    = _fetch_scenario_config()
     all_sessions = supabase.table('sessions').select('*').execute().data
 
     seq_rec, scenario = get_session_config(all_seqs, scenarios, all_sessions, lock_window_hours=1.5)
-    # except ValueError:
-    #     st.error("All sequences are currently locked or completed. Please try again shortly.")
-    #     st.stop()
 
-    # — now build your trial_seq as before —
     fy_trials = [int(x) for x in seq_rec['five_year_trials']]
     tm_trials = [int(x) for x in seq_rec['three_month_trials']]
     trial_seq = fy_trials if scenario['num_trials'] == 5 else tm_trials
-
-
-
-    # # convert the stored string arrays to ints
-    # fy_trials = [int(x) for x in seq_rec['five_year_trials']]
-    # tm_trials = [int(x) for x in seq_rec['three_month_trials']]
 
     # choose based on scenario length
     if scenario.get('num_trials') == 5:
@@ -177,21 +161,9 @@ def _create_new_session(session_id):
         'max_trials':         len(trial_seq)
     }).execute()
 
-
 def get_session_config(all_seqs, scenarios, all_sessions, lock_window_hours=1.5):
-    """
-    1. Identify all “valid” sessions:
-         • completed_at != None AND data_quality == True, OR
-         • created_at within the last lock_window_hours.
-    2. Group valid sessions by trial_sequence_id.
-    3. For each group:
-         – If it already has 4 sessions, skip.
-         – Otherwise, compute which scenario_ids haven’t appeared, pick one at random,
-           and return that scenario + the group’s trial_sequence.
-    4. If every group has 4 (or there are no sessions at all), return a random
-       (trial_sequence, scenario) pair.
-    """
-   
+    """Select a scenario and sequence based on existing sessions and lock window"""
+
     now = datetime.now(timezone.utc)
     lock_threshold = now - timedelta(hours=lock_window_hours)
 
@@ -203,12 +175,8 @@ def get_session_config(all_seqs, scenarios, all_sessions, lock_window_hours=1.5)
         completed = sess['completed_at']
         dq_good = sess.get('data_quality') is True
 
-        
-
         if (completed is not None and dq_good) or (created >= lock_threshold):
             valid.append(sess)
-
-        print("Created:", created, "Loxk Threshold:", lock_threshold)
 
     # 2. Group by sequence
     by_seq = defaultdict(list)

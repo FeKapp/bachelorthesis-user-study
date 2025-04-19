@@ -18,8 +18,6 @@ def show_consent():
         consent_file_path = os.path.join("assets", "text", "consent.txt")
         consent_text = load_text(consent_file_path)
         
-
-
         # Consent form
         with st.form(key="consent_form"):
             st.markdown(consent_text)   

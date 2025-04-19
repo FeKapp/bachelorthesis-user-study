@@ -1,8 +1,6 @@
 import streamlit as st
 import os
-import pandas as pd
 from modules.database import supabase, update_session_progress, save_allocation, save_demographics
-from modules.components.charts import create_performance_bar_chart
 
 def show_final():
     st.title("Final Allocation")

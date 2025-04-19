@@ -1,5 +1,4 @@
 import streamlit as st
-import numpy as np
 import pandas as pd
 import os
 from modules.database import supabase, update_session_progress
@@ -12,34 +11,6 @@ def handle_demo_steps():
         show_demo_ai()
     elif st.session_state.trial_step == 3:
         show_demo_performance()
-
-# def show_demo_initial():
-#     st.title("Demo: Initial Allocation")
-#     st.markdown(
-#         "<div style='color: red; margin-bottom: 20px;'>This is a demonstration of the initial allocation step. "
-#         "Try adjusting the slider to see how allocations work.</div>",
-#         unsafe_allow_html=True
-#     )
-
-#     col1, col2 = st.columns(2)
-#     with col1:
-#         st.markdown("## Fund A")
-#         st.image(os.path.join("assets", "images", "fund_A.png"), width=200)
-#         initial_a = st.number_input("Allocation to Fund A (%)", min_value=0, max_value=100, value= None, key="demo_initial_a")
-#     with col2:
-#         st.markdown("## Fund B")
-#         st.image(os.path.join("assets", "images", "fund_B.png"), width=200)
-#         initial_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - initial_a) if initial_a is not None else 0, key="demo_initial_b", disabled=True)
-#         st.write(f"Automatic allocation: {initial_b}%")
-
-#     if st.button("Submit Allocation"):
-#         if initial_a is None:
-#             st.error("Allocation to Fund A (0% - 100%) is required.")
-#         else:
-#             st.session_state.trial_step = 2
-#             update_session_progress(st.query_params['session_id'])
-#             st.rerun()   
-
 
 def show_demo_initial():
     st.title("Demo: Initial Allocation")
@@ -58,7 +29,6 @@ def show_demo_initial():
         st.markdown("Please allocate your assets to Fund A (0-100%) and Fund B (0-100%) for the **next 3 months**.")
     else:
         st.markdown("Please allocate your assets to Fund A (0-100%) and Fund B (0-100%) for the **next 5 years**.")
-
 
     col1, col2 = st.columns(2)
     with col1:
@@ -95,8 +65,6 @@ def show_demo_initial():
             update_session_progress(st.query_params['session_id'])
             st.rerun()
 
-
-
 def show_demo_ai():
     st.title("Demo: AI Recommendation")
     
@@ -112,9 +80,6 @@ def show_demo_ai():
         """)
 
     # Display user and AI allocations
-    # initial_a, initial_b = st.session_state.allocations[st.session_state.trial]['initial']
-    # ai_a, ai_b = st.session_state.allocations[st.session_state.trial]['ai']
-    
     initial_a = st.session_state.demo_data['initial_a']
     initial_b = st.session_state.demo_data['initial_b']
     ai_a = st.session_state.demo_data['ai_a']
@@ -184,7 +149,6 @@ def show_demo_performance():
         'Category': ['Your Portfolio 👤', 'AI Portfolio ✨', 'Fund A 🔵', 'Fund B 🟡'],
         'Performance': [user_return*100, ai_return*100, return_a*100, return_b*100 ]
     })
-
 
     if st.session_state.max_trials == 100:
         duration = "last 3 months"
