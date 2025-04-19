@@ -170,7 +170,6 @@ def get_session_config(all_seqs, scenarios, all_sessions, lock_window_hours=1.5)
     # 1. Filter valid sessions
     valid = []
     for sess in all_sessions:
-        print(sess['created_at'])
         created = isoparse(sess['created_at'])
         completed = sess['completed_at']
         dq_good = sess.get('data_quality') is True
