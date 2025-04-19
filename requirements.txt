@@ -1,7 +1,8 @@
-streamlit == 1.43.2
+streamlit==1.43.2
 numpy
 pandas
 supabase
 python-dotenv
 plotly
 pycountry
+python-dateutil

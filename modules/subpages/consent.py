@@ -1,7 +1,6 @@
 import streamlit as st
 import os
 from modules.database import supabase
-from modules.session import update_session_progress
 
 def show_consent():
     st.title("Welcome!")
