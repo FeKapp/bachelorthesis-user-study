@@ -13,7 +13,7 @@ def cached_performance_chart(df):
 def handle_trial_steps():
     session_id = st.query_params['session_id']
     
-    if st.session_state.trial >= st.session_state.max_trials:
+    if st.session_state.trial > st.session_state.max_trials:
         st.session_state.page = 'final'
         update_session_progress(session_id)
         st.rerun()

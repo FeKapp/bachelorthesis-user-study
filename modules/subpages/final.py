@@ -30,7 +30,7 @@ def show_final():
             save_allocation(
                 st.query_params['session_id'],
                 st.session_state.trial,
-                'final',
+                'last-50y',
                 final_a,
                 final_b,
                 portfolio_return
