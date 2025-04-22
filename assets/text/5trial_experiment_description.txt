@@ -1,22 +1,22 @@
-In this experiment, you will be asked to make several financial investment decisions. Imagine you have been saving steadily and now you have a substantial amount of your own money that you would like to invest in order to achieve the best possible return. Every 5 years, you will decide how much of your money to allocate between two investment options, called **Fund A** and **Fund B**. The performance of the two funds is not yet known, but you will be able to observe it during the experiment.
+In this experiment, you will be asked to make several financial investment decisions. Imagine you have been saving steadily and now you have a substantial amount of your own money that you would like to invest in order to achieve the best possible return. Every 5 years, you will decide and evaluate how much of your money to allocate between two investment options, called **Fund A** and **Fund B**. Both funds are made up of real‑world investments, that will remain the same during throughout the study. Their values will change over time. You will be able to see how they perform during the experiment. 
 
 Each investment decision for a financial period (5 years) has **3 phases**:
 
 1. **Initial Allocation**  
-   You will first be asked how much of your assets you wish to invest in Fund A, a percentage from 0% (allocate nothing to Fund A) to 100% (allocate all assets to Fund A). Everything you do not allocate to Fund A will automatically be allocated to Fund B.  
+   You will first be asked how much of your money you wish to invest in Fund A, a percentage from 0% (allocate nothing to Fund A) to 100% (allocate all assets to Fund A). Everything you do not allocate to Fund A will automatically be allocated to Fund B.  
    *Example:* If you choose to invest 60% in Fund A, then 40% will automatically be invested in Fund B.
 
 2. **AI Recommendation**  
-   Once you have made your initial decision, you will receive a recommendation from an Artificial Intelligence (AI) model suggesting how to allocate your money between these two funds. This AI is specialized in recommending financial investments and is designed to help investors like you make better financial decisions. After receiving the AI recommendation, you will have the option to either keep your original investment choice or adjust your allocation based on the AI's suggestion.
+   Once you have made your initial decision, you will receive a recommendation from an artificial intelligence (AI) model trained on the two investment choices, suggesting how to allocate your money between these two funds. This AI is specialized in recommending financial investments, and is designed to help investors like you make financial decisions. After receiving the AI recommendation, you will have the option to either keep your original investment choice or adjust your allocation based on the AI's suggestion.
 
 3. **Performance Feedback**  
-   After confirming your final decision, you will see the performance of each investment option (Fund A and Fund B), your chosen allocation, and the AI's recommended allocation. The performance will be displayed clearly, showing the returns (profits or losses) of each fund as percentages.
+   After confirming your final decision, you will see the investment performance of your chosen allocation, the AI's recommended allocation and Fund A and Fund B throughout the last 5 years. The performance will be displayed clearly, showing the returns (profits or losses) of each fund as percentages.
 
-You will then be asked to make the decision for the **next 5 years**.
+You will then be asked to make the next decision how you allocate your assets for the **next 5 years**.
 
-At the end of the experiment, you are asked to make a **final investment decision** for **50 years**. Again, your objective is to achieve the highest possible return.
+At the end of the experiment, you are asked to make a **final long-term investment decision** for **50 years**, based on your observations throughout the experiment. Again, your objective is to achieve the highest possible return.
 
-To familiarize yourself with the process, you will first take part in a **guided demo**. Please note that all numbers shown during the demo are randomly generated and do not reflect the actual behavior of the AI or the actual returns of Fund A and Fund B in the study.
+To familiarise yourself with the process, you will first take part in a **guided demo**. Please note that the numbers shown during the demo are randomly generated for illustrative purposes. They do not reflect the actual behaviour of the AI or the actual returns of Fund A and Fund B in the study after the demo.
 
 Please consider your decisions carefully. **Do not write anything down during this experiment.** 
 

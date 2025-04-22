@@ -1,6 +1,8 @@
 import streamlit as st
+from streamlit.components.v1 import html
 import os
 import pandas as pd
+from modules.subpages.intro import scroll_to_top
 from modules.database import supabase, update_session_progress, save_allocation
 from modules.components.charts import create_performance_bar_chart
 
@@ -26,8 +28,8 @@ def handle_trial_steps():
     }
     step_handlers.get(st.session_state.trial_step, show_initial_allocation)()
 
-
 def show_initial_allocation():
+    scroll_to_top()
     session_id     = st.query_params['session_id']
     ordinal        = st.session_state.trial
     actual_trial   = st.session_state.trial_sequence[ordinal - 1]
@@ -36,7 +38,7 @@ def show_initial_allocation():
     periods = "3 months" if st.session_state.max_trials == 100 else "5 years"
     
     st.title(f"Step 1: Initial Allocation")
-    st.markdown(f"Please allocate your assets for the **next {periods}**.")
+    st.markdown(f"Please allocate your money for the **next {periods}**.")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -74,6 +76,7 @@ def show_initial_allocation():
         st.rerun()
 
 def show_ai_recommendation():
+    scroll_to_top()
     session_id   = st.query_params['session_id']
     ordinal      = st.session_state.trial
     actual_trial = st.session_state.trial_sequence[ordinal - 1]
@@ -105,7 +108,7 @@ def show_ai_recommendation():
             st.metric("Fund B:", f"{ai_b}%")
 
     st.markdown("---")
-    st.markdown("Based on your initial allocation and the AI recommendation, how do you allocate your assets?")
+    st.markdown("Based on your initial allocation and the AI recommendation, how do you allocate your money?")
     
     col3, col4 = st.columns(2)
     with col3:
@@ -131,7 +134,7 @@ def show_ai_recommendation():
         st.rerun()
 
 def show_instructed():
-
+    scroll_to_top()
     session_id = st.query_params['session_id']
     current_trial = st.session_state.trial
     scenario_id = st.session_state.scenario_id
@@ -164,7 +167,7 @@ def show_instructed():
 
     # Final allocation input
     st.markdown("---")
-    st.markdown("Based on your initial allocation and the AI recommendation, how do you allocate your assets?")
+    st.markdown("Based on your initial allocation and the AI recommendation, how do you allocate your money?")
     
     col3, col4 = st.columns(2)
     with col3:
@@ -194,6 +197,7 @@ def show_instructed():
         st.rerun()
 
 def show_performance():
+    scroll_to_top()
     session_id   = st.query_params['session_id']
     ordinal      = st.session_state.trial
     actual_trial = st.session_state.trial_sequence[ordinal - 1]
@@ -217,12 +221,12 @@ def show_performance():
     - Your Portfolio: **Fund A**: {final_a}%, **Fund B**: {final_b}%
     - AI portfolio: **Fund A**: {ai_a}%, **Fund B**: {ai_b}%
     
-    Overview how your portfolio, the AI portfolio, Fund A and Fund B performed in the **{duration}**:
+    Overview how your portfolio, the AI portfolio, Fund A and Fund B performed during the **{duration}**:
     """)
 
     st.plotly_chart(cached_performance_chart(df), use_container_width=True)
 
-    btn_label = "Continue" if ordinal < st.session_state.max_trials else "Finish"
+    btn_label = "Continue to next period" if ordinal < st.session_state.max_trials else ":red[Next: Final Decision]"
     if st.button(btn_label, key=f"continue_{ordinal}"):
         if ordinal < st.session_state.max_trials:
             st.session_state.trial      += 1

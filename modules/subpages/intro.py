@@ -1,19 +1,23 @@
 import streamlit as st
+from streamlit.components.v1 import html
 import os
 import numpy as np
 from modules.database import supabase
 
 def scroll_to_top():
-    st.markdown(
+    # inject a tiny iframe/html snippet with your JS
+    html(
         """
         <script>
-            window.onload = function() {
-                /* Scroll the parent container (the main section) to the top: */
-                window.parent.document.querySelector('section.main').scrollTo(0, 0);
-            }
+          // Find the <main> container and scroll it to 0,0 immediately
+          const main = window.parent.document.querySelector('main');
+          if (main) {
+            main.scroll(0, 0);
+          }
         </script>
         """,
-        unsafe_allow_html=True
+        height=0,
+        width=0,
     )
 
 def show_intro():
