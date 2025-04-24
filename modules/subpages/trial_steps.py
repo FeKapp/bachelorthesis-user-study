@@ -59,6 +59,9 @@ def show_initial_allocation():
         if initial_a is None:
             st.error("Allocation to Fund A (0% - 100%) is required.")
             return
+        elif initial_b is None:
+            st.error("Please press enter after allocating Fund A to automatically allocate Fund B.")
+            return
 
         save_allocation(session_id, actual_trial, 'initial', initial_a, initial_b)
         
@@ -123,9 +126,12 @@ def show_ai_recommendation():
 
     if st.button("Submit Allocation", key=f"final_btn_{ordinal}"):
         if final_a is None:
-            st.error("Allocation to Fund A is required.")
+            st.error("Allocation to Fund A (0% - 100%)is required.")
             return
-
+        elif final_b is None:
+            st.error("Please press enter after allocating Fund A to automatically allocate Fund B.")
+            return
+        
         save_allocation(session_id, actual_trial, 'final', final_a, final_b)
         st.session_state.allocations[ordinal]['final'] = (final_a, final_b)
 

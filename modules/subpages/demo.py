@@ -59,6 +59,8 @@ def show_demo_initial():
     if st.button("Submit Allocation"):
         if initial_a is None:
             st.error("Please specify a percentage for Fund A (0% – 100%).")
+        elif initial_b is None:
+            st.error("Please press enter after allocating Fund A to automatically allocate Fund B.")
         else:
             st.session_state.demo_data['initial_a'] = initial_a
             st.session_state.demo_data['initial_b'] = initial_b
@@ -113,6 +115,8 @@ def show_demo_ai():
     if st.button("Submit Allocation"):
         if final_a is None:
             st.error("Allocation to Fund A is required.")
+        elif final_b is None:
+            st.error("Please press enter after allocating Fund A to automatically allocate Fund B.")
         else:
             st.session_state.demo_data['final_a'] = final_a
             st.session_state.demo_data['final_b'] = final_b

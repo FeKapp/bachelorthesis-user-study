@@ -161,7 +161,7 @@ def _create_new_session(session_id):
         'max_trials':         len(trial_seq)
     }).execute()
 
-def get_session_config(all_seqs, scenarios, all_sessions, lock_window_hours=1.5):
+def get_session_config(all_seqs, scenarios, all_sessions, lock_window_hours=1):
     """Select a scenario and sequence based on existing sessions and lock window"""
 
     now = datetime.now(timezone.utc)
