@@ -9,17 +9,23 @@ def show_final():
     
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown("## Fund A")
+        st.markdown("## Fund A 🔵")
         st.image(os.path.join("assets", "images", "fund_A.png"), width=200)
         final_a = st.number_input("Allocation to Fund A (%)", min_value=0, max_value=100, value= None, key="demo_initial_a")
     with col2:
-        st.markdown("## Fund B")
+        st.markdown("## Fund B 🟡")
         st.image(os.path.join("assets", "images", "fund_B.png"), width=200)
         final_b = st.number_input("Automatic allocation to Fund B (%)", min_value=0, max_value=100, value= (100 - final_a) if final_a is not None else 0, key="demo_initial_b", disabled=True)
 
+    final_allocation = st.checkbox(
+                "Confirm your final allocation for the next 50 years. You will not receive an AI recommendation for this step."
+            )
+    
     if st.button("Submit Final Allocation"):
-        if final_a is None:
+        if final_a is None or final_b is None:
             st.error("Allocation to Fund A (0% - 100%) is required.")
+        elif final_allocation is False:
+            st.error("You must confirm your final allocation to continue.")
         else:
             current_trial = st.session_state.max_trials
             # If not found, default returns

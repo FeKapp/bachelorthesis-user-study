@@ -1,4 +1,5 @@
 streamlit==1.43.2
+streamlit_scroll_to_top
 numpy
 pandas
 supabase
