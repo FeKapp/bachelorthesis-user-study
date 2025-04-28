@@ -122,7 +122,7 @@ def show_ai_recommendation():
         final_b = 100 - final_a if final_a is not None else 0
         st.number_input("Automatic allocation to Fund B (%)", 
                         min_value=0, max_value=100, 
-                        value=final_b, key=f"initial_b_{ordinal}", disabled=True)
+                        value=final_b, key=f"final_b_{ordinal}", disabled=True)
 
     if st.button("Submit Allocation", key=f"final_btn_{ordinal}"):
         if final_a is None:
@@ -185,7 +185,7 @@ def show_instructed():
         instructed_b = 100 - instructed_a if instructed_a is not None else 0
         st.number_input("Automatic allocation to Fund B (%)", 
                       min_value=0, max_value=100, 
-                      value=instructed_b, key=f"initial_b_{current_trial}", disabled=True)
+                      value=instructed_b, key=f"final_b_{current_trial}", disabled=True)
 
     
     # Submit allocation

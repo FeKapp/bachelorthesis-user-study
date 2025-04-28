@@ -1,7 +1,6 @@
 import streamlit as st
 import os
 from modules.database import supabase
-from streamlit_scroll_to_top import scroll_to_here
 
 def show_consent():
     st.title("Welcome!")
