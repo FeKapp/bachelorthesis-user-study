@@ -29,10 +29,11 @@ def create_performance_bar_chart(df, margin=None, fixed_y_range=None):
     ])
     
     #set the fixed range based on returns analysis for scenarios
+    # scale so that average return for each fund appears the same size on the subjects screen across conditions
     if st.session_state.max_trials == 100:
         fixed_y_range = [-35, 35]
     else:
-        fixed_y_range = [-120, 120]
+        fixed_y_range = [-135, 135]
 
     fig.update_layout(
     xaxis=dict(
